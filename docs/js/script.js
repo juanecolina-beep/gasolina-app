@@ -1,12 +1,12 @@
-// script.js: gasolinera más barata con auto-refresh, resaltado y etiqueta visual
+// Mostrar gasolinera más barata, actualizar automáticamente y resaltar
 document.addEventListener("DOMContentLoaded", () => {
   const output = document.getElementById('barata');
-  const csvPath = 'docs/precios_gasolina.csv'; // Ajusta según tu estructura
+  const csvPath = 'docs/precios_gasolina.csv'; // ruta correcta en GitHub Pages
   let lastCSV = '';
 
   async function actualizarGasolinera() {
     try {
-      const response = await fetch(csvPath + '?t=' + Date.now()); // evitar cache
+      const response = await fetch(csvPath + '?t=' + Date.now()); // evita cache
       if (!response.ok) throw new Error("CSV no encontrado");
       const text = await response.text();
 
@@ -39,10 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
         output.innerHTML = "No hay precios válidos";
         output.style.backgroundColor = "";
       } else {
-        // Mostrar con icono y etiqueta
         output.innerHTML = `💰 <strong>${minEstacion}</strong> - ${minPrecio.toFixed(2)} € <span style="color: green; font-weight: bold;">¡Mejor precio!</span>`;
-
-        // Resaltado visual temporal
         output.style.transition = "background-color 0.8s ease";
         output.style.backgroundColor = "#d4edda"; // verde suave
         setTimeout(() => {
@@ -60,7 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Actualiza al cargar y luego cada 5 minutos
+  // Ejecutar al cargar y luego cada 5 minutos
   actualizarGasolinera();
   setInterval(actualizarGasolinera, 5 * 60 * 1000);
 });
