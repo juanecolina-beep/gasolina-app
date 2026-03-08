@@ -1,4 +1,4 @@
-// script.js final para GitHub Pages
+// script.js final con fecha de última actualización
 document.addEventListener("DOMContentLoaded", () => {
     const output = document.getElementById('barata');
     const csvPath = './docs/precios_gasolina.csv?t=' + Date.now(); // evita cache
@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             let minPrecio = Infinity;
             let minEstacion = '';
+            let fechaActualizacion = '';
 
             for (let line of lines) {
                 if(!line) continue;
@@ -26,6 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (!isNaN(p) && p < minPrecio) {
                     minPrecio = p;
                     minEstacion = `${estacion} - ${direccion}`;
+                    fechaActualizacion = fecha;
                 }
             }
 
@@ -33,7 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 output.textContent = "No hay precios válidos";
                 output.style.backgroundColor = "#f8d7da"; // rojo suave
             } else {
-                output.innerHTML = `💰 <strong>${minEstacion}</strong>: ${minPrecio.toFixed(2)} € ¡Mejor precio!`;
+                output.innerHTML = `💰 <strong>${minEstacion}</strong>: ${minPrecio.toFixed(2)} €<br><small>Última actualización: ${fechaActualizacion}</small>`;
                 output.style.backgroundColor = "#d4edda"; // verde suave
                 setTimeout(() => {
                     output.style.backgroundColor = "";
