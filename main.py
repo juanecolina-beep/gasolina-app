@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import sqlite3
 from datetime import datetime
 import os
+import time
 
 URL = "https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/"
 MARCA = "REPSOL"
@@ -17,15 +18,31 @@ DOCS = "docs"
 os.makedirs(DOCS, exist_ok=True)
 os.makedirs(os.path.join(DOCS, "js"), exist_ok=True)
 
-print("Consultando API del Ministerio...")
+# --- FUNCION PARA REINTENTOS ---
+def obtener_api(max_intentos=3, delay=5):
+    for intento in range(max_intentos):
+        try:
+            print(f"Consultando API del Ministerio... intento {intento+1}")
+            response = requests.get(URL, timeout=15)
+            response.raise_for_status()
+            return response.json()
+        except Exception as e:
+            print(f"Error al consultar API (intento {intento+1}/{max_intentos}): {e}")
+            if intento < max_intentos - 1:
+                time.sleep(delay)
+            else:
+                print("No se pudo obtener datos de la API después de varios intentos")
+                return None
 
-try:
-    response = requests.get(URL, timeout=15)
-    response.raise_for_status()
-    data = response.json()
-except Exception as e:
-    print("Error al consultar API:", e)
-    exit(1)
+data = obtener_api()
+if not data:
+    # Generar CSV vacío con mensaje para que JS no falle
+    csv_path = os.path.join(DOCS, "precios_gasolina.csv")
+    with open(csv_path, "w", encoding="utf-8") as f:
+        f.write("fecha;estacion;direccion;precio\n")
+        f.write("Error;No hay datos;No hay datos;0\n")
+    print(f"CSV vacío generado en {csv_path}")
+    exit(0)
 
 lista = data.get("ListaEESSPrecio", [])
 
@@ -47,6 +64,10 @@ for e in lista:
 
 if not precios:
     print("No se encontraron estaciones Repsol en Seseña")
+    csv_path = os.path.join(DOCS, "precios_gasolina.csv")
+    with open(csv_path, "w", encoding="utf-8") as f:
+        f.write("fecha;estacion;direccion;precio\n")
+        f.write("Error;No hay datos;No hay datos;0\n")
     exit(0)
 
 print(f"Se encontraron {len(precios)} estaciones.")
@@ -113,7 +134,7 @@ print("CSV guardado en docs/precios_gasolina.csv")
 
 # JS para la gasolinera más barata
 js_code = f"""
-fetch('precios_gasolina.csv')
+fetch('docs/precios_gasolina.csv?t=' + Date.now())
 .then(response => {{
     if (!response.ok) throw new Error("CSV no encontrado");
     return response.text();
@@ -140,7 +161,7 @@ fetch('precios_gasolina.csv')
     if (minPrecio === Infinity) {{
         document.getElementById('barata').textContent = "No hay precios válidos";
     }} else {{
-        document.getElementById('barata').textContent = `${{minEstacion}}: ${{minPrecio}} €`;
+        document.getElementById('barata').textContent = `💰 ${{minEstacion}}: ${{minPrecio}} € ¡Mejor precio!`;
     }}
 }})
 .catch(error => {{
@@ -148,6 +169,6 @@ fetch('precios_gasolina.csv')
     document.getElementById('barata').textContent = "No se pudo cargar el CSV";
 }});
 """
-with open(os.path.join(DOCS, "js", "script.js"), "w") as f:
+with open(os.path.join(DOCS, "js", "script.js"), "w", encoding="utf-8") as f:
     f.write(js_code)
 print("JS guardado en docs/js/script.js")
