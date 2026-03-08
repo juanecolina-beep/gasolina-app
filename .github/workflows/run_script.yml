@@ -1,15 +1,19 @@
-name: Ejecutar script gasolina
+name: Actualizar precios gasolina
 
 on:
   schedule:
-    - cron: "0 8 * * *"  # Todos los días a las 08:00
-  workflow_dispatch:      # Permite ejecutar manualmente
+    - cron: "0 8 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
-  ejecutar-script:
+  actualizar:
     runs-on: ubuntu-latest
 
     steps:
+
       - name: Clonar repositorio
         uses: actions/checkout@v3
 
@@ -19,10 +23,17 @@ jobs:
           python-version: "3.11"
 
       - name: Instalar dependencias
-        run: pip install -r requirements.txt
+        run: |
+          pip install -r requirements.txt
 
       - name: Ejecutar script
-        run: python main.py
+        run: |
+          python main.py
 
-      - name: Listar archivos (opcional, para debug)
-        run: ls -la
+      - name: Subir cambios al repositorio
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add docs/
+          git commit -m "Actualizar datos gasolina" || echo "No hay cambios"
+          git push
