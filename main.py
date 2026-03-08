@@ -18,6 +18,8 @@ DOCS = "docs"
 JS_DIR = os.path.join(DOCS, "js")
 os.makedirs(JS_DIR, exist_ok=True)
 
+CSV_PATH = "precios_gasolina.csv"
+
 # --- FUNCION PARA REINTENTOS ---
 def obtener_api(max_intentos=3, delay=5):
     for intento in range(max_intentos):
@@ -35,11 +37,9 @@ def obtener_api(max_intentos=3, delay=5):
                 return None
 
 data = obtener_api()
-# --- Definir CSV en la raíz para que GitHub Pages lo lea ---
-CSV_PATH = "precios_gasolina.csv"
 
+# --- Generar CSV vacío si falla la API ---
 if not data:
-    # Generar CSV vacío con mensaje para que JS no falle
     with open(CSV_PATH, "w", encoding="utf-8") as f:
         f.write("fecha;estacion;direccion;precio\n")
         f.write("Error;No hay datos;No hay datos;0\n")
@@ -57,6 +57,7 @@ for e in lista:
             try:
                 precio_f = float(precio.replace(",", "."))
                 precios.append({
+                    "fecha": datetime.now().strftime("%Y-%m-%d"),
                     "estacion": e.get("Rótulo"),
                     "direccion": e.get("Dirección"),
                     "precio": precio_f
@@ -73,7 +74,7 @@ if not precios:
 
 print(f"Se encontraron {len(precios)} estaciones.")
 
-# Base de datos
+# --- Base de datos ---
 conn = sqlite3.connect(DB)
 cursor = conn.cursor()
 cursor.execute("""
@@ -87,14 +88,12 @@ CREATE TABLE IF NOT EXISTS precios_gasolina (
 """)
 conn.commit()
 
-hoy_str = datetime.now().strftime("%Y-%m-%d")
-
 # Guardar precios sin duplicar
 for p in precios:
     cursor.execute("""
-    SELECT * FROM precios_gasolina
+    SELECT 1 FROM precios_gasolina
     WHERE fecha=? AND estacion=? AND direccion=?
-    """, (hoy_str, p["estacion"], p["direccion"]))
+    """, (p["fecha"], p["estacion"], p["direccion"]))
     
     if cursor.fetchone():
         print("Precio ya registrado hoy:", p["precio"])
@@ -102,12 +101,12 @@ for p in precios:
         cursor.execute("""
         INSERT INTO precios_gasolina (fecha, estacion, direccion, precio)
         VALUES (?, ?, ?, ?)
-        """, (hoy_str, p["estacion"], p["direccion"], p["precio"]))
+        """, (p["fecha"], p["estacion"], p["direccion"], p["precio"]))
         print("Guardado:", p["precio"])
 
 conn.commit()
 
-# DataFrame para análisis
+# --- DataFrame para análisis ---
 df = pd.read_sql_query("SELECT * FROM precios_gasolina", conn)
 conn.close()
 
@@ -129,24 +128,20 @@ plt.tight_layout()
 plt.savefig(os.path.join(DOCS, "historial_gasolina.png"))
 print("Gráfico guardado en docs/historial_gasolina.png")
 
-# Guardar CSV en la raíz del repo
+# Guardar CSV
 df.to_csv(CSV_PATH, index=False, sep=';')
 print(f"CSV guardado en {CSV_PATH}")
 
-# JS para la gasolinera más barata
+# --- Calcular gasolinera más barata ---
+min_row = df.loc[df['precio'].idxmin()]
+print(f"💰 Gasolinera más barata: {min_row['estacion']} - {min_row['direccion']} : {min_row['precio']} €")
+
+# JS para mostrar gasolinera más barata
 js_code = f"""
 fetch('precios_gasolina.csv?t=' + Date.now())
-.then(response => {{
-    if (!response.ok) throw new Error("CSV no encontrado");
-    return response.text();
-}})
+.then(response => response.text())
 .then(text => {{
     const lines = text.split('\\n').slice(1);
-    if (lines.length === 0) {{
-        document.getElementById('barata').textContent = "No hay datos disponibles";
-        return;
-    }}
-
     let minPrecio = Infinity;
     let minEstacion = '';
     for (let line of lines) {{
@@ -158,15 +153,9 @@ fetch('precios_gasolina.csv?t=' + Date.now())
             minEstacion = `${{estacion}} - ${{direccion}}`;
         }}
     }}
-
-    if (minPrecio === Infinity) {{
-        document.getElementById('barata').textContent = "No hay precios válidos";
-    }} else {{
-        document.getElementById('barata').textContent = `💰 ${{minEstacion}}: ${{minPrecio}} € ¡Mejor precio!`;
-    }}
+    document.getElementById('barata').textContent = minPrecio === Infinity ? "No hay precios válidos" : `💰 ${{minEstacion}}: ${{minPrecio}} € ¡Mejor precio!`;
 }})
-.catch(error => {{
-    console.error(error);
+.catch(() => {{
     document.getElementById('barata').textContent = "No se pudo cargar el CSV";
 }});
 """
