@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // Mostrar gasolinera más barata con manejo de errores
 fetch('precios_gasolina.csv')
 .then(response => {
@@ -33,3 +34,23 @@ fetch('precios_gasolina.csv')
     console.error(error);
     document.getElementById('barata').textContent = "No se pudo cargar el CSV";
 });
+=======
+
+fetch('precios_gasolina.csv')
+.then(response => response.text())
+.then(text => {
+    const lines = text.split('\n').slice(1);
+    let minPrecio = Infinity;
+    let minEstacion = '';
+    for(let line of lines){
+        if(!line) continue;
+        const [fecha, estacion, direccion, precio] = line.split(',');
+        const p = parseFloat(precio);
+        if(p < minPrecio){
+            minPrecio = p;
+            minEstacion = estacion + " - " + direccion;
+        }
+    }
+    document.getElementById('barata').textContent = `${minEstacion}: ${minPrecio} €`;
+});
+>>>>>>> 171b15d7ce5dee95036dc1217dc1b0aaa9094df2
