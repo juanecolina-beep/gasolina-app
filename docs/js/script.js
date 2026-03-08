@@ -1,0 +1,18 @@
+
+fetch('precios_gasolina.csv')
+.then(response => response.text())
+.then(text => {
+    const lines = text.split('\n').slice(1);
+    let minPrecio = Infinity;
+    let minEstacion = '';
+    for(let line of lines){
+        if(!line) continue;
+        const [fecha, estacion, direccion, precio] = line.split(',');
+        const p = parseFloat(precio);
+        if(p < minPrecio){
+            minPrecio = p;
+            minEstacion = estacion + " - " + direccion;
+        }
+    }
+    document.getElementById('barata').textContent = `${minEstacion}: ${minPrecio} €`;
+});
