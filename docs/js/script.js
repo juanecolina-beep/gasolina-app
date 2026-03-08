@@ -1,3 +1,4 @@
+// Mostrar gasolinera más barata con manejo de errores
 fetch('precios_gasolina.csv')
 .then(response => {
     if (!response.ok) throw new Error("CSV no encontrado");
@@ -12,11 +13,10 @@ fetch('precios_gasolina.csv')
 
     let minPrecio = Infinity;
     let minEstacion = '';
-
     for (let line of lines) {
-        if(!line) continue;
-        const [fecha, estacion, direccion, precio] = line.split(';'); // <-- usar ';' si tu CSV lo usa
-        const p = parseFloat(precio.replace(',', '.')); // por si el decimal está con coma
+        if (!line) continue;
+        const [fecha, estacion, direccion, precio] = line.split(',');
+        const p = parseFloat(precio);
         if (!isNaN(p) && p < minPrecio) {
             minPrecio = p;
             minEstacion = `${estacion} - ${direccion}`;
