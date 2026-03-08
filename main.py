@@ -15,8 +15,8 @@ TIPO = "Precio Gasolina 95 E5"
 DB = "gasolina.db"
 
 DOCS = "docs"
-os.makedirs(DOCS, exist_ok=True)
-os.makedirs(os.path.join(DOCS, "js"), exist_ok=True)
+JS_DIR = os.path.join(DOCS, "js")
+os.makedirs(JS_DIR, exist_ok=True)
 
 # --- FUNCION PARA REINTENTOS ---
 def obtener_api(max_intentos=3, delay=5):
@@ -35,13 +35,15 @@ def obtener_api(max_intentos=3, delay=5):
                 return None
 
 data = obtener_api()
+# --- Definir CSV en la raíz para que GitHub Pages lo lea ---
+CSV_PATH = "precios_gasolina.csv"
+
 if not data:
     # Generar CSV vacío con mensaje para que JS no falle
-    csv_path = os.path.join(DOCS, "precios_gasolina.csv")
-    with open(csv_path, "w", encoding="utf-8") as f:
+    with open(CSV_PATH, "w", encoding="utf-8") as f:
         f.write("fecha;estacion;direccion;precio\n")
         f.write("Error;No hay datos;No hay datos;0\n")
-    print(f"CSV vacío generado en {csv_path}")
+    print(f"CSV vacío generado en {CSV_PATH}")
     exit(0)
 
 lista = data.get("ListaEESSPrecio", [])
@@ -64,8 +66,7 @@ for e in lista:
 
 if not precios:
     print("No se encontraron estaciones Repsol en Seseña")
-    csv_path = os.path.join(DOCS, "precios_gasolina.csv")
-    with open(csv_path, "w", encoding="utf-8") as f:
+    with open(CSV_PATH, "w", encoding="utf-8") as f:
         f.write("fecha;estacion;direccion;precio\n")
         f.write("Error;No hay datos;No hay datos;0\n")
     exit(0)
@@ -128,13 +129,13 @@ plt.tight_layout()
 plt.savefig(os.path.join(DOCS, "historial_gasolina.png"))
 print("Gráfico guardado en docs/historial_gasolina.png")
 
-# CSV en docs con separador ';'
-df.to_csv(os.path.join(DOCS, "precios_gasolina.csv"), index=False, sep=';')
-print("CSV guardado en docs/precios_gasolina.csv")
+# Guardar CSV en la raíz del repo
+df.to_csv(CSV_PATH, index=False, sep=';')
+print(f"CSV guardado en {CSV_PATH}")
 
 # JS para la gasolinera más barata
 js_code = f"""
-fetch('docs/precios_gasolina.csv?t=' + Date.now())
+fetch('precios_gasolina.csv?t=' + Date.now())
 .then(response => {{
     if (!response.ok) throw new Error("CSV no encontrado");
     return response.text();
@@ -169,6 +170,6 @@ fetch('docs/precios_gasolina.csv?t=' + Date.now())
     document.getElementById('barata').textContent = "No se pudo cargar el CSV";
 }});
 """
-with open(os.path.join(DOCS, "js", "script.js"), "w", encoding="utf-8") as f:
+with open(os.path.join(JS_DIR, "script.js"), "w", encoding="utf-8") as f:
     f.write(js_code)
 print("JS guardado en docs/js/script.js")
