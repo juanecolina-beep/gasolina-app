@@ -132,7 +132,7 @@ if len(df) > 0 and df['precio'].max() > 0:
 else:
     barata_texto = "No hay precios válidos"
 
-# --- Generar JS directo ---
+# --- Generar JS directo (sin fetch) ---
 js_code = f'document.getElementById("barata").textContent = "{barata_texto}";'
 with open(os.path.join(JS_DIR, "script.js"), "w", encoding="utf-8") as f:
     f.write(js_code)
