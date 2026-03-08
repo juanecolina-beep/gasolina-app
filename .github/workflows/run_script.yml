@@ -2,7 +2,7 @@ name: Actualizar precios gasolina
 
 on:
   schedule:
-    - cron: "0 8 * * *"  # Cada día a las 08:00 UTC
+    - cron: "0 8 * * *"  # Ejecutar cada día a las 08:00 UTC
   workflow_dispatch:
 
 permissions:
@@ -13,27 +13,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Clonar repositorio
       - name: Clonar repositorio
         uses: actions/checkout@v3
 
-      - name: Instalar Python
+      # Instalar Python
+      - name: Configurar Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
 
+      # Instalar dependencias
       - name: Instalar dependencias
-        run: pip install --upgrade pip && pip install -r requirements.txt
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
 
-      - name: Configurar variables de entorno
-        env:
-          API_KEY: ${{ secrets.API_KEY }}  # si tu script necesita un token
-        run: echo "Variables configuradas"
-
-      - name: Ejecutar script
+      # Ejecutar script principal
+      - name: Ejecutar main.py
         run: python main.py
-        env:
-          API_KEY: ${{ secrets.API_KEY }}  # exporta al script
 
+      # Commit automático solo si hay cambios
       - name: Commit cambios automáticos
         run: |
           git config user.name "github-actions"
