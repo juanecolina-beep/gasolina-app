@@ -1,63 +1,39 @@
-// Mostrar gasolinera más barata, actualizar automáticamente y resaltar
 document.addEventListener("DOMContentLoaded", () => {
-  const output = document.getElementById('barata');
-  const csvPath = 'docs/precios_gasolina.csv'; // ruta correcta en GitHub Pages
-  let lastCSV = '';
+    const output = document.getElementById('barata');
+    const csvPath = './docs/precios_gasolina.csv?t=' + Date.now(); // ruta relativa correcta
 
-  async function actualizarGasolinera() {
-    try {
-      const response = await fetch(csvPath + '?t=' + Date.now()); // evita cache
-      if (!response.ok) throw new Error("CSV no encontrado");
-      const text = await response.text();
-
-      if (text === lastCSV) return; // no hay cambios
-      lastCSV = text;
-
-      const lines = text.trim().split('\n');
-      if (lines.length <= 1) {
-        output.innerHTML = "No hay datos disponibles";
-        output.style.backgroundColor = "";
-        return;
-      }
-
-      const dataLines = lines.slice(1).filter(line => line.trim() !== '');
-      let minPrecio = Infinity;
-      let minEstacion = '';
-
-      for (let line of dataLines) {
-        const cols = line.split(',');
-        if (cols.length < 4) continue;
-        const [fecha, estacion, direccion, precio] = cols;
-        const p = parseFloat(precio);
-        if (!isNaN(p) && p < minPrecio) {
-          minPrecio = p;
-          minEstacion = `${estacion} - ${direccion}`;
+    fetch(csvPath)
+    .then(response => {
+        if (!response.ok) throw new Error("CSV no encontrado");
+        return response.text();
+    })
+    .then(text => {
+        const lines = text.trim().split('\n').slice(1);
+        if (lines.length === 0) {
+            output.textContent = "No hay datos disponibles";
+            return;
         }
-      }
 
-      if (minPrecio === Infinity) {
-        output.innerHTML = "No hay precios válidos";
-        output.style.backgroundColor = "";
-      } else {
-        output.innerHTML = `💰 <strong>${minEstacion}</strong> - ${minPrecio.toFixed(2)} € <span style="color: green; font-weight: bold;">¡Mejor precio!</span>`;
-        output.style.transition = "background-color 0.8s ease";
-        output.style.backgroundColor = "#d4edda"; // verde suave
-        setTimeout(() => {
-          output.style.backgroundColor = "";
-        }, 2000);
-      }
+        let minPrecio = Infinity;
+        let minEstacion = '';
+        for (let line of lines) {
+            if(!line) continue;
+            const [fecha, estacion, direccion, precio] = line.split(';');
+            const p = parseFloat(precio);
+            if (!isNaN(p) && p < minPrecio) {
+                minPrecio = p;
+                minEstacion = `${estacion} - ${direccion}`;
+            }
+        }
 
-    } catch (error) {
-      console.error(error);
-      output.innerHTML = "No se pudo cargar el CSV";
-      output.style.backgroundColor = "#f8d7da"; // rojo suave para error
-      setTimeout(() => {
-        output.style.backgroundColor = "";
-      }, 2000);
-    }
-  }
-
-  // Ejecutar al cargar y luego cada 5 minutos
-  actualizarGasolinera();
-  setInterval(actualizarGasolinera, 5 * 60 * 1000);
+        if (minPrecio === Infinity) {
+            output.textContent = "No hay precios válidos";
+        } else {
+            output.innerHTML = `💰 <strong>${minEstacion}</strong>: ${minPrecio} € ¡Mejor precio!`;
+        }
+    })
+    .catch(error => {
+        console.error(error);
+        output.textContent = "No se pudo cargar el CSV";
+    });
 });
