@@ -13,9 +13,9 @@ MUNICIPIO = "SESEÑA"
 TIPO = "Precio Gasolina 95 E5"
 DB = "gasolina.db"
 
-# Carpeta donde GitHub Pages sirve la web
 DOCS = "docs"
 os.makedirs(DOCS, exist_ok=True)
+os.makedirs(os.path.join(DOCS, "js"), exist_ok=True)
 
 print("Consultando API del Ministerio...")
 
@@ -54,7 +54,6 @@ print(f"Se encontraron {len(precios)} estaciones.")
 # Base de datos
 conn = sqlite3.connect(DB)
 cursor = conn.cursor()
-
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS precios_gasolina (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -94,25 +93,44 @@ if len(df) == 0:
     print("No hay datos para gráfico")
     exit(0)
 
-# Gráfico histórico por dirección
+# Gráfico histórico
 plt.figure(figsize=(8,5))
 for dir in df["direccion"].unique():
     sub = df[df["direccion"] == dir]
     plt.plot(sub["fecha"], sub["precio"], marker="o", label=dir)
-
 plt.title(f"Gasolina 95 Repsol - Seseña")
 plt.xlabel("Fecha")
 plt.ylabel("Precio (€)")
 plt.xticks(rotation=45)
 plt.legend()
 plt.tight_layout()
+plt.savefig(os.path.join(DOCS, "historial_gasolina.png"))
+print("Gráfico guardado en docs/historial_gasolina.png")
 
-# Guardar en la carpeta docs para que GitHub Pages lo sirva
-ruta_grafico = os.path.join(DOCS, "historial_gasolina.png")
-plt.savefig(ruta_grafico)
-print(f"Gráfico guardado en {ruta_grafico}")
+# CSV en docs
+df.to_csv(os.path.join(DOCS, "precios_gasolina.csv"), index=False)
+print("CSV guardado en docs/precios_gasolina.csv")
 
-# Guardar CSV en docs también
-ruta_csv = os.path.join(DOCS, "precios_gasolina.csv")
-df.to_csv(ruta_csv, index=False)
-print(f"CSV guardado en {ruta_csv}")
+# JS para la gasolinera más barata
+js_code = f"""
+fetch('precios_gasolina.csv')
+.then(response => response.text())
+.then(text => {{
+    const lines = text.split('\\n').slice(1);
+    let minPrecio = Infinity;
+    let minEstacion = '';
+    for(let line of lines){{
+        if(!line) continue;
+        const [fecha, estacion, direccion, precio] = line.split(',');
+        const p = parseFloat(precio);
+        if(p < minPrecio){{
+            minPrecio = p;
+            minEstacion = estacion + " - " + direccion;
+        }}
+    }}
+    document.getElementById('barata').textContent = `${{minEstacion}}: ${{minPrecio}} €`;
+}});
+"""
+with open(os.path.join(DOCS, "js", "script.js"), "w") as f:
+    f.write(js_code)
+print("JS guardado en docs/js/script.js")
