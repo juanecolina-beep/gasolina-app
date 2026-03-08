@@ -5,12 +5,17 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import sqlite3
 from datetime import datetime
+import os
 
 URL = "https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/"
 MARCA = "REPSOL"
 MUNICIPIO = "SESEÑA"
 TIPO = "Precio Gasolina 95 E5"
 DB = "gasolina.db"
+
+# Carpeta donde GitHub Pages sirve la web
+DOCS = "docs"
+os.makedirs(DOCS, exist_ok=True)
 
 print("Consultando API del Ministerio...")
 
@@ -101,5 +106,13 @@ plt.ylabel("Precio (€)")
 plt.xticks(rotation=45)
 plt.legend()
 plt.tight_layout()
-plt.savefig("historial_gasolina.png")
-print("Gráfico guardado historial_gasolina.png")
+
+# Guardar en la carpeta docs para que GitHub Pages lo sirva
+ruta_grafico = os.path.join(DOCS, "historial_gasolina.png")
+plt.savefig(ruta_grafico)
+print(f"Gráfico guardado en {ruta_grafico}")
+
+# Guardar CSV en docs también
+ruta_csv = os.path.join(DOCS, "precios_gasolina.csv")
+df.to_csv(ruta_csv, index=False)
+print(f"CSV guardado en {ruta_csv}")
