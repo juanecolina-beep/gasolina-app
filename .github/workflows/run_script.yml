@@ -2,7 +2,7 @@ name: Actualizar precios gasolina
 
 on:
   schedule:
-    - cron: "0 8 * * *"  # Cada día a las 08:00 UTC
+    - cron: "0 8 * * *"  # Cada día 08:00 UTC
   workflow_dispatch:
 
 permissions:
@@ -13,7 +13,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Clonar repositorio
         uses: actions/checkout@v3
 
