@@ -1,0 +1,28 @@
+name: Ejecutar script gasolina
+
+on:
+  schedule:
+    - cron: "0 8 * * *"  # Todos los días a las 08:00
+  workflow_dispatch:      # Permite ejecutar manualmente
+
+jobs:
+  ejecutar-script:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clonar repositorio
+        uses: actions/checkout@v3
+
+      - name: Instalar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Ejecutar script
+        run: python main.py
+
+      - name: Listar archivos (opcional, para debug)
+        run: ls -la
