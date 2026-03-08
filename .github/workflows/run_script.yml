@@ -1,8 +1,8 @@
-name: Actualizar precios gasolina (avanzado)
+name: Actualizar precios gasolina
 
 on:
   schedule:
-    - cron: "0 8 * * *"  # Cada día 08:00 UTC
+    - cron: "0 8 * * *"  # Cada día a las 08:00 UTC
   workflow_dispatch:
 
 permissions:
@@ -24,51 +24,13 @@ jobs:
       - name: Instalar dependencias
         run: pip install -r requirements.txt
 
-      - name: Ejecutar script avanzado con reintentos y log de fallos
-        run: |
-          python - <<'EOF'
-          import requests
-          from requests.adapters import HTTPAdapter, Retry
-          from datetime import datetime
-          import os, csv
-
-          URL_API = "https://api.ministerio.gob/endpoint"  # tu URL real
-          OUTPUT_FILE = "docs/precios_gasolina.csv"
-          LOG_FILE = "logs/fallos_api.csv"
-
-          os.makedirs("logs", exist_ok=True)
-
-          session = requests.Session()
-          retries = Retry(total=5, backoff_factor=2, status_forcelist=[429, 500, 502, 503, 504])
-          session.mount("https://", HTTPAdapter(max_retries=retries))
-
-          ahora = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
-
-          try:
-              print(f"{ahora} - Consultando API del Ministerio...")
-              response = session.get(URL_API, timeout=10)
-              response.raise_for_status()
-              data = response.json()
-              # Guardar CSV principal
-              with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
-                  f.write(str(data))  # Reemplaza con tu lógica de CSV
-              print("Datos obtenidos y guardados correctamente.")
-          except requests.exceptions.RequestException as e:
-              error_msg = f"{ahora} - ERROR: {e}"
-              print(error_msg)
-              # Guardar mensaje en CSV principal
-              with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
-                  f.write("Error: datos no disponibles\n")
-              # Registrar fallo histórico
-              with open(LOG_FILE, "a", newline="", encoding="utf-8") as log_f:
-                  writer = csv.writer(log_f)
-                  writer.writerow([ahora, str(e)])
-EOF
+      - name: Ejecutar script
+        run: python main.py
 
       - name: Commit cambios automáticos
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add docs/ logs/
-          git commit -m "Actualizar datos gasolina y registro de fallos" || echo "No hay cambios"
+          git add docs/
+          git commit -m "Actualizar datos gasolina" || echo "No hay cambios"
           git push
