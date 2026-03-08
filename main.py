@@ -107,28 +107,45 @@ plt.tight_layout()
 plt.savefig(os.path.join(DOCS, "historial_gasolina.png"))
 print("Gráfico guardado en docs/historial_gasolina.png")
 
-# CSV en docs
-df.to_csv(os.path.join(DOCS, "precios_gasolina.csv"), index=False)
+# CSV en docs con separador ';'
+df.to_csv(os.path.join(DOCS, "precios_gasolina.csv"), index=False, sep=';')
 print("CSV guardado en docs/precios_gasolina.csv")
 
 # JS para la gasolinera más barata
 js_code = f"""
 fetch('precios_gasolina.csv')
-.then(response => response.text())
+.then(response => {{
+    if (!response.ok) throw new Error("CSV no encontrado");
+    return response.text();
+}})
 .then(text => {{
     const lines = text.split('\\n').slice(1);
+    if (lines.length === 0) {{
+        document.getElementById('barata').textContent = "No hay datos disponibles";
+        return;
+    }}
+
     let minPrecio = Infinity;
     let minEstacion = '';
-    for(let line of lines){{
+    for (let line of lines) {{
         if(!line) continue;
-        const [fecha, estacion, direccion, precio] = line.split(',');
+        const [fecha, estacion, direccion, precio] = line.split(';');
         const p = parseFloat(precio);
-        if(p < minPrecio){{
+        if (!isNaN(p) && p < minPrecio) {{
             minPrecio = p;
-            minEstacion = estacion + " - " + direccion;
+            minEstacion = `${{estacion}} - ${{direccion}}`;
         }}
     }}
-    document.getElementById('barata').textContent = `${{minEstacion}}: ${{minPrecio}} €`;
+
+    if (minPrecio === Infinity) {{
+        document.getElementById('barata').textContent = "No hay precios válidos";
+    }} else {{
+        document.getElementById('barata').textContent = `${{minEstacion}}: ${{minPrecio}} €`;
+    }}
+}})
+.catch(error => {{
+    console.error(error);
+    document.getElementById('barata').textContent = "No se pudo cargar el CSV";
 }});
 """
 with open(os.path.join(DOCS, "js", "script.js"), "w") as f:
