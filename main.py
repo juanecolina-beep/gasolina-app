@@ -7,7 +7,7 @@ from datetime import datetime
 import os
 import time
 
-# --- Configuración ---
+# Configuración
 URL = "https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/"
 MARCA = "REPSOL"
 MUNICIPIO = "SESEÑA"
@@ -18,13 +18,15 @@ JS_DIR = os.path.join(DOCS, "js")
 os.makedirs(JS_DIR, exist_ok=True)
 
 CSV_PATH = os.path.join(DOCS, "precios_gasolina.csv")
+GRAFICO_PATH = os.path.join(DOCS, "historial_gasolina.png")
+JS_PATH = os.path.join(JS_DIR, "script.js")
 
-# --- Función para consultar API con reintentos ---
+# Función API con reintentos
 def obtener_api(max_intentos=5, delay=10):
     headers = {"User-Agent": "Mozilla/5.0"}
     for i in range(max_intentos):
         try:
-            print(f"Intento {i+1} de consulta a la API...")
+            print(f"Intento {i+1} consulta API")
             r = requests.get(URL, headers=headers, timeout=20)
             r.raise_for_status()
             return r.json()
@@ -33,7 +35,7 @@ def obtener_api(max_intentos=5, delay=10):
             time.sleep(delay)
     return None
 
-# --- Obtener datos ---
+# Obtener datos
 data = obtener_api()
 
 precios = []
@@ -53,7 +55,7 @@ if data:
                 except:
                     pass
 
-# --- Guardar CSV ---
+# CSV actualizado
 if precios:
     df = pd.DataFrame(precios)
 else:
@@ -62,7 +64,7 @@ else:
 df.to_csv(CSV_PATH, index=False, sep=';')
 print(f"CSV guardado en {CSV_PATH}")
 
-# --- Generar gráfico histórico ---
+# Gráfico histórico
 if not df.empty and df['precio'].max() > 0:
     plt.figure(figsize=(8,5))
     for d in df["direccion"].unique():
@@ -74,19 +76,19 @@ if not df.empty and df['precio'].max() > 0:
     plt.xticks(rotation=45)
     plt.legend()
     plt.tight_layout()
-    plt.savefig(os.path.join(DOCS, "historial_gasolina.png"))
+    plt.savefig(GRAFICO_PATH)
     plt.close()
-    print("Gráfico generado")
+    print(f"Gráfico guardado en {GRAFICO_PATH}")
 
-# --- Gasolinera más barata ---
+# Gasolinera más barata
 if not df.empty and df['precio'].max() > 0:
     min_row = df.loc[df['precio'].idxmin()]
     barata_texto = f"💰 {min_row['estacion']} - {min_row['direccion']}: {min_row['precio']} € ¡Mejor precio!"
 else:
     barata_texto = "No hay precios válidos"
 
-# --- Generar JS directo ---
+# JS directo para web
 js_code = f'document.getElementById("barata").textContent = "{barata_texto}";'
-with open(os.path.join(JS_DIR, "script.js"), "w", encoding="utf-8") as f:
+with open(JS_PATH, "w", encoding="utf-8") as f:
     f.write(js_code)
-print("JS actualizado en docs/js/script.js")
+print(f"JS actualizado en {JS_PATH}")
