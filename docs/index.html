@@ -1,22 +1,31 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8">
-<title>Gasolina Repsol Seseña</title>
+    <meta charset="utf-8">
+    <title>Gasolina 95 Repsol - Seseña</title>
 </head>
+
 <body>
 
 <h1>Gasolina 95 Repsol - Seseña</h1>
 
 <h2>Gráfico histórico</h2>
-<img src="historial_gasolina.png" width="700">
+<img src="historial_gasolina.png" width="700" alt="Gráfico histórico de precios">
 
 <h2>Gasolinera más barata hoy</h2>
 <p id="barata">Cargando...</p>
 
 <h2>Descargar histórico de precios</h2>
-<a href="precios_gasolina.csv" download>CSV de precios</a>
+<a id="csvlink" href="precios_gasolina.csv" download>CSV de precios</a>
 
+<!-- Opcional: forzar recarga del CSV para que no use caché -->
+<script>
+    const csvLink = document.getElementById("csvlink");
+    csvLink.href = "precios_gasolina.csv?v=" + Date.now();
+</script>
+
+<!-- JS que genera el texto de la gasolinera más barata -->
 <script src="js/script.js"></script>
+
 </body>
 </html>
