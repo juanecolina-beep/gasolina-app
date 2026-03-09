@@ -4,7 +4,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 import os
 import time
 
@@ -24,6 +24,9 @@ os.makedirs(JS_DIR, exist_ok=True)
 
 # CSV dentro de docs (IMPORTANTE para GitHub Pages)
 CSV_PATH = os.path.join(DOCS, "precios_gasolina.csv")
+
+# --- Fecha de hoy CET ---
+hoy = (datetime.now(timezone.utc) + timedelta(hours=1)).strftime("%Y-%m-%d")
 
 # --- Función para consultar API con reintentos ---
 def obtener_api(max_intentos=5, delay=10):
@@ -65,7 +68,7 @@ else:
                 try:
                     precio_f = float(precio.replace(",", "."))
                     precios.append({
-                        "fecha": datetime.now().strftime("%Y-%m-%d"),
+                        "fecha": hoy,
                         "estacion": e.get("Rótulo"),
                         "direccion": e.get("Dirección"),
                         "precio": precio_f
@@ -114,7 +117,7 @@ else:
 df.to_csv(CSV_PATH, index=False, sep=';')
 print(f"CSV guardado en {CSV_PATH}")
 
-# --- Generar gráfico histórico ---
+# --- Gráfico histórico ---
 if len(df) > 0:
     plt.figure(figsize=(8,5))
     for dir in df["direccion"].unique():
@@ -130,19 +133,17 @@ if len(df) > 0:
     plt.savefig(grafico_path)
     print(f"Gráfico guardado en {grafico_path}")
 
-# --- Gasolinera más barata del día actual ---
-hoy = datetime.now().strftime("%Y-%m-%d")
+# --- Gasolinera más barata hoy ---
 df_hoy = df[df['fecha'] == hoy]
-
 if len(df_hoy) > 0 and df_hoy['precio'].max() > 0:
     min_row = df_hoy.loc[df_hoy['precio'].idxmin()]
-    barata_texto = f"💰 {min_row['estacion']} - {min_row['direccion']}: {min_row['precio']} € ¡Mejor precio hoy!"
+    barata_texto = f"💰 {min_row['estacion']} - {min_row['direccion']}: {min_row['precio']} € ¡Mejor precio!"
 else:
-    barata_texto = "No hay precios válidos para hoy"
+    barata_texto = "No hay precios válidos"
 
 # --- Generar JS para la web ---
 js_code = f'document.getElementById("barata").textContent = "{barata_texto}";'
 js_path = os.path.join(JS_DIR, "script.js")
 with open(js_path, "w", encoding="utf-8") as f:
     f.write(js_code)
-print(f"JS actualizado en {js_path} con el precio más barato de hoy")
+print(f"JS actualizado en {js_path}")
