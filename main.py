@@ -4,7 +4,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import sqlite3
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, date
 import os
 import time
 
@@ -22,11 +22,7 @@ JS_DIR = os.path.join(DOCS, "js")
 os.makedirs(DOCS, exist_ok=True)
 os.makedirs(JS_DIR, exist_ok=True)
 
-# CSV dentro de docs (IMPORTANTE para GitHub Pages)
 CSV_PATH = os.path.join(DOCS, "precios_gasolina.csv")
-
-# --- Fecha de hoy CET ---
-hoy = (datetime.now(timezone.utc) + timedelta(hours=1)).strftime("%Y-%m-%d")
 
 # --- Función para consultar API con reintentos ---
 def obtener_api(max_intentos=5, delay=10):
@@ -68,7 +64,7 @@ else:
                 try:
                     precio_f = float(precio.replace(",", "."))
                     precios.append({
-                        "fecha": hoy,
+                        "fecha": date.today().isoformat(),
                         "estacion": e.get("Rótulo"),
                         "direccion": e.get("Dirección"),
                         "precio": precio_f
@@ -85,7 +81,7 @@ else:
                 f.write("Error;No hay datos;No hay datos;0\n")
             exit(0)
     else:
-        # --- Guardar en SQLite ---
+        # Guardar en SQLite
         conn = sqlite3.connect(DB)
         cursor = conn.cursor()
         cursor.execute("""
@@ -113,6 +109,9 @@ else:
         df = pd.read_sql_query("SELECT * FROM precios_gasolina", conn)
         conn.close()
 
+# --- Asegurar que la columna fecha sea datetime ---
+df['fecha'] = pd.to_datetime(df['fecha'], format="%Y-%m-%d", errors='coerce')
+
 # --- Guardar CSV actualizado ---
 df.to_csv(CSV_PATH, index=False, sep=';')
 print(f"CSV guardado en {CSV_PATH}")
@@ -133,13 +132,13 @@ if len(df) > 0:
     plt.savefig(grafico_path)
     print(f"Gráfico guardado en {grafico_path}")
 
-# --- Gasolinera más barata hoy ---
-df_hoy = df[df['fecha'] == hoy]
-if len(df_hoy) > 0 and df_hoy['precio'].max() > 0:
+# --- Gasolinera más barata HOY ---
+df_hoy = df[df['fecha'].dt.date == date.today()]
+if len(df_hoy) > 0:
     min_row = df_hoy.loc[df_hoy['precio'].idxmin()]
     barata_texto = f"💰 {min_row['estacion']} - {min_row['direccion']}: {min_row['precio']} € ¡Mejor precio!"
 else:
-    barata_texto = "No hay precios válidos"
+    barata_texto = "No hay precios válidos hoy"
 
 # --- Generar JS para la web ---
 js_code = f'document.getElementById("barata").textContent = "{barata_texto}";'
