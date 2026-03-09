@@ -22,8 +22,10 @@ JS_DIR = os.path.join(DOCS, "js")
 os.makedirs(DOCS, exist_ok=True)
 os.makedirs(JS_DIR, exist_ok=True)
 
-# CSV dentro de docs (IMPORTANTE para GitHub Pages)
-CSV_PATH = os.path.join(DOCS, "precios_gasolina.csv")
+# --- Nombre de CSV con fecha para evitar caché ---
+fecha_hoy = datetime.now().strftime("%Y-%m-%d")
+csv_name = f"precios_gasolina_{fecha_hoy}.csv"
+CSV_PATH = os.path.join(DOCS, csv_name)
 
 # --- Función para consultar API con reintentos ---
 def obtener_api(max_intentos=5, delay=10):
@@ -46,15 +48,18 @@ data = obtener_api()
 
 # --- Usar último CSV si falla la API ---
 if not data:
-    if os.path.exists(CSV_PATH):
-        print("API caída, usando CSV anterior")
+    csvs_existentes = sorted([f for f in os.listdir(DOCS) if f.startswith("precios_gasolina_") and f.endswith(".csv")], reverse=True)
+    if csvs_existentes:
+        CSV_PATH = os.path.join(DOCS, csvs_existentes[0])
+        print(f"API caída, usando último CSV disponible: {CSV_PATH}")
         df = pd.read_csv(CSV_PATH, sep=';')
     else:
+        # Crear CSV vacío
         with open(CSV_PATH, "w", encoding="utf-8") as f:
             f.write("fecha;estacion;direccion;precio\n")
             f.write("Error;No hay datos;No hay datos;0\n")
         print(f"CSV vacío generado en {CSV_PATH}")
-        exit(0)
+        df = pd.read_csv(CSV_PATH, sep=';')
 else:
     lista = data.get("ListaEESSPrecio", [])
     precios = []
@@ -65,7 +70,7 @@ else:
                 try:
                     precio_f = float(precio.replace(",", "."))
                     precios.append({
-                        "fecha": datetime.now().strftime("%Y-%m-%d"),
+                        "fecha": fecha_hoy,
                         "estacion": e.get("Rótulo"),
                         "direccion": e.get("Dirección"),
                         "precio": precio_f
@@ -74,13 +79,7 @@ else:
                     pass
     if not precios:
         print("No se encontraron estaciones Repsol en Seseña")
-        if os.path.exists(CSV_PATH):
-            df = pd.read_csv(CSV_PATH, sep=';')
-        else:
-            with open(CSV_PATH, "w", encoding="utf-8") as f:
-                f.write("fecha;estacion;direccion;precio\n")
-                f.write("Error;No hay datos;No hay datos;0\n")
-            exit(0)
+        df = pd.DataFrame(columns=["fecha", "estacion", "direccion", "precio"])
     else:
         # --- Guardar en SQLite ---
         conn = sqlite3.connect(DB)
@@ -138,8 +137,12 @@ else:
     barata_texto = "No hay precios válidos"
 
 # --- Generar JS para la web ---
-js_code = f'document.getElementById("barata").textContent = "{barata_texto}";'
+js_code = f'''
+document.getElementById("barata").textContent = "{barata_texto}";
+document.getElementById("link_csv").href = "{csv_name}";
+'''
+
 js_path = os.path.join(JS_DIR, "script.js")
 with open(js_path, "w", encoding="utf-8") as f:
     f.write(js_code)
-print(f"JS actualizado en {js_path}")
+print(f"JS actualizado en {js_path} con CSV dinámico")
