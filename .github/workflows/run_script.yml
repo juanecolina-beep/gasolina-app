@@ -33,12 +33,11 @@ jobs:
       - name: Ejecutar main.py
         run: python main.py
 
-      # Commit automático solo si hay cambios
+      # Commit y push solo de los archivos generados en docs/
       - name: Commit cambios automáticos
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add .
-          # Solo hace commit si hay cambios
+          git add docs/precios_gasolina.csv docs/historial_gasolina.png docs/js/script.js
           git diff --cached --quiet || git commit -m "Actualizar datos gasolina"
           git push
