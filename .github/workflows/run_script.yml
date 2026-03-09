@@ -2,7 +2,7 @@ name: Actualizar precios gasolina
 
 on:
   schedule:
-    - cron: "0 8 * * *"  # Cada día a las 08:00 UTC
+    - cron: "0 8 * * *"
   workflow_dispatch:
 
 permissions:
@@ -12,24 +12,19 @@ jobs:
   actualizar:
     runs-on: ubuntu-latest
     steps:
-      - name: Clonar repositorio
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: Configurar Python
-        uses: actions/setup-python@v4
+      - uses: actions/setup-python@v4
         with:
           python-version: "3.11"
 
-      - name: Instalar dependencias
-        run: |
+      - run: |
           pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Ejecutar main.py
-        run: python main.py
+      - run: python main.py
 
-      - name: Commit y push solo si hay cambios
-        run: |
+      - run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git add docs/
