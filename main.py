@@ -17,81 +17,94 @@ DB = "gasolina.db"
 
 DOCS = "docs"
 JS_DIR = os.path.join(DOCS, "js")
+
+# Crear carpetas necesarias
 os.makedirs(DOCS, exist_ok=True)
 os.makedirs(JS_DIR, exist_ok=True)
 
+# CSV dentro de docs (IMPORTANTE para GitHub Pages)
 CSV_PATH = os.path.join(DOCS, "precios_gasolina.csv")
-GRAFICO_PATH = os.path.join(DOCS, "historial_gasolina.png")
-JS_PATH = os.path.join(JS_DIR, "script.js")
 
-# --- Función API con reintentos ---
+# --- Función para consultar API con reintentos ---
 def obtener_api(max_intentos=5, delay=10):
     HEADERS = {"User-Agent": "Mozilla/5.0"}
     for intento in range(max_intentos):
         try:
+            print(f"Consultando API del Ministerio... intento {intento+1}")
             response = requests.get(URL, headers=HEADERS, timeout=20)
             response.raise_for_status()
             return response.json()
         except Exception as e:
-            print(f"Error intento {intento+1}: {e}")
-            if intento < max_intentos-1:
+            print(f"Error al consultar API (intento {intento+1}/{max_intentos}): {e}")
+            if intento < max_intentos - 1:
                 time.sleep(delay)
+    print("No se pudo obtener datos de la API después de varios intentos")
     return None
 
 # --- Obtener datos ---
 data = obtener_api()
 
+# --- Si falla la API, usar último CSV ---
 if not data:
-    print("API caída, uso CSV anterior si existe")
     if os.path.exists(CSV_PATH):
+        print("API caída, usando CSV anterior")
         df = pd.read_csv(CSV_PATH, sep=';')
     else:
-        df = pd.DataFrame([{"fecha":"Error","estacion":"No hay datos","direccion":"No hay datos","precio":0}])
-        df.to_csv(CSV_PATH, index=False, sep=';')
+        with open(CSV_PATH, "w", encoding="utf-8") as f:
+            f.write("fecha;estacion;direccion;precio\n")
+            f.write("Error;No hay datos;No hay datos;0\n")
+        print(f"CSV vacío generado en {CSV_PATH}")
+        exit(0)
 else:
     lista = data.get("ListaEESSPrecio", [])
     precios = []
     for e in lista:
-        if MARCA in e.get("Rótulo","").upper() and MUNICIPIO in e.get("Municipio","").upper():
+        if MARCA in e.get("Rótulo", "").upper() and MUNICIPIO in e.get("Municipio", "").upper():
             precio = e.get(TIPO)
             if precio and precio.strip():
                 try:
+                    precio_f = float(precio.replace(",", "."))
                     precios.append({
                         "fecha": datetime.now().strftime("%Y-%m-%d"),
                         "estacion": e.get("Rótulo"),
                         "direccion": e.get("Dirección"),
-                        "precio": float(precio.replace(",", "."))
+                        "precio": precio_f
                     })
                 except:
                     pass
     if not precios:
+        print("No se encontraron estaciones Repsol en Seseña")
         if os.path.exists(CSV_PATH):
             df = pd.read_csv(CSV_PATH, sep=';')
         else:
-            df = pd.DataFrame([{"fecha":"Error","estacion":"No hay datos","direccion":"No hay datos","precio":0}])
+            with open(CSV_PATH, "w", encoding="utf-8") as f:
+                f.write("fecha;estacion;direccion;precio\n")
+                f.write("Error;No hay datos;No hay datos;0\n")
+            exit(0)
     else:
-        # Guardar en SQLite
+        # --- Guardar en SQLite ---
         conn = sqlite3.connect(DB)
         cursor = conn.cursor()
         cursor.execute("""
-            CREATE TABLE IF NOT EXISTS precios_gasolina (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                fecha TEXT,
-                estacion TEXT,
-                direccion TEXT,
-                precio REAL
-            )
+        CREATE TABLE IF NOT EXISTS precios_gasolina (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            fecha TEXT,
+            estacion TEXT,
+            direccion TEXT,
+            precio REAL
+        )
         """)
         conn.commit()
         for p in precios:
             cursor.execute("""
-                SELECT 1 FROM precios_gasolina WHERE fecha=? AND estacion=? AND direccion=?
+            SELECT 1 FROM precios_gasolina
+            WHERE fecha=? AND estacion=? AND direccion=?
             """, (p["fecha"], p["estacion"], p["direccion"]))
             if cursor.fetchone():
                 continue
             cursor.execute("""
-                INSERT INTO precios_gasolina (fecha, estacion, direccion, precio)
-                VALUES (?, ?, ?, ?)
+            INSERT INTO precios_gasolina (fecha, estacion, direccion, precio)
+            VALUES (?, ?, ?, ?)
             """, (p["fecha"], p["estacion"], p["direccion"], p["precio"]))
         conn.commit()
         df = pd.read_sql_query("SELECT * FROM precios_gasolina", conn)
@@ -101,11 +114,13 @@ else:
 df.to_csv(CSV_PATH, index=False, sep=';')
 print(f"CSV guardado en {CSV_PATH}")
 
-# --- Gráfico histórico ---
-if len(df)>0:
+# --- Generar gráfico histórico ---
+if len(df) > 0:
     plt.figure(figsize=(8,5))
+    df['fecha'] = pd.to_datetime(df['fecha'], format='%Y-%m-%d')
+    df = df.sort_values('fecha')
     for dir in df["direccion"].unique():
-        sub = df[df["direccion"]==dir]
+        sub = df[df["direccion"] == dir]
         plt.plot(sub["fecha"], sub["precio"], marker="o", label=dir)
     plt.title("Gasolina 95 Repsol - Seseña")
     plt.xlabel("Fecha")
@@ -113,17 +128,20 @@ if len(df)>0:
     plt.xticks(rotation=45)
     plt.legend()
     plt.tight_layout()
-    plt.savefig(GRAFICO_PATH)
-    print(f"Gráfico guardado en {GRAFICO_PATH}")
+    grafico_path = os.path.join(DOCS, "historial_gasolina.png")
+    plt.savefig(grafico_path)
+    print(f"Gráfico guardado en {grafico_path}")
 
 # --- Gasolinera más barata ---
-if len(df)>0 and df['precio'].max()>0:
+if len(df) > 0 and df['precio'].max() > 0:
     min_row = df.loc[df['precio'].idxmin()]
     barata_texto = f"💰 {min_row['estacion']} - {min_row['direccion']}: {min_row['precio']} € ¡Mejor precio!"
 else:
     barata_texto = "No hay precios válidos"
 
-# --- Generar JS directo ---
-with open(JS_PATH, "w", encoding="utf-8") as f:
-    f.write(f'document.getElementById("barata").textContent = "{barata_texto}";')
-print(f"JS actualizado en {JS_PATH}")
+# --- Generar JS para la web ---
+js_code = f'document.getElementById("barata").textContent = "{barata_texto}";'
+js_path = os.path.join(JS_DIR, "script.js")
+with open(js_path, "w", encoding="utf-8") as f:
+    f.write(js_code)
+print(f"JS actualizado en {js_path}")
