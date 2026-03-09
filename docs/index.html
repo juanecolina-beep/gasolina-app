@@ -16,10 +16,15 @@
 <p id="barata">Cargando...</p>
 
 <h2>Descargar histórico de precios</h2>
-<a id="link_csv" download>CSV de precios</a>
+<a id="csvlink" href="precios_gasolina.csv" download>CSV de precios</a>
 
-<!-- El JS generado por main.py actualizará el texto y el link del CSV automáticamente -->
+<!-- Script para forzar versión nueva del CSV y mostrar gasolinera más barata -->
 <script src="js/script.js"></script>
+<script>
+  // Forzar que el link del CSV siempre cargue el más reciente
+  const csvLink = document.getElementById("csvlink");
+  csvLink.href = "precios_gasolina.csv?v=" + Date.now();
+</script>
 
 </body>
 </html>
