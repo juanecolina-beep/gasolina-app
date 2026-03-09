@@ -18,11 +18,10 @@ DB = "gasolina.db"
 DOCS = "docs"
 JS_DIR = os.path.join(DOCS, "js")
 
-# Crear carpetas necesarias
 os.makedirs(DOCS, exist_ok=True)
 os.makedirs(JS_DIR, exist_ok=True)
 
-# CSV dentro de docs (para GitHub Pages)
+# CSV dentro de docs (IMPORTANTE para GitHub Pages)
 CSV_PATH = os.path.join(DOCS, "precios_gasolina.csv")
 
 # --- Función para consultar API con reintentos ---
@@ -44,9 +43,6 @@ def obtener_api(max_intentos=5, delay=10):
 # --- Obtener datos ---
 data = obtener_api()
 
-# --- DataFrame final ---
-df = pd.DataFrame()
-
 # --- Usar último CSV si falla la API ---
 if not data:
     if os.path.exists(CSV_PATH):
@@ -56,13 +52,11 @@ if not data:
         with open(CSV_PATH, "w", encoding="utf-8") as f:
             f.write("fecha;estacion;direccion;precio\n")
             f.write("Error;No hay datos;No hay datos;0\n")
-        print(f"CSV vacío generado en {CSV_PATH}")
         exit(0)
 else:
     lista = data.get("ListaEESSPrecio", [])
     precios = []
     hoy_str = datetime.now().strftime("%Y-%m-%d")
-
     for e in lista:
         if MARCA in e.get("Rótulo", "").upper() and MUNICIPIO in e.get("Municipio", "").upper():
             precio = e.get(TIPO)
@@ -113,8 +107,8 @@ else:
             INSERT INTO precios_gasolina (fecha, estacion, direccion, precio)
             VALUES (?, ?, ?, ?)
             """, (p["fecha"], p["estacion"], p["direccion"], p["precio"]))
-
         conn.commit()
+
         df = pd.read_sql_query("SELECT * FROM precios_gasolina", conn)
         conn.close()
 
@@ -122,7 +116,7 @@ else:
 df.to_csv(CSV_PATH, index=False, sep=';')
 print(f"CSV guardado en {CSV_PATH}")
 
-# --- Gráfico histórico ---
+# --- Generar gráfico histórico ---
 if len(df) > 0:
     plt.figure(figsize=(8,5))
     for dir in df["direccion"].unique():
@@ -134,17 +128,18 @@ if len(df) > 0:
     plt.xticks(rotation=45)
     plt.legend()
     plt.tight_layout()
-    grafico_path = os.path.join(DOCS, "historial_gasolina.png")
-    plt.savefig(grafico_path)
-    print(f"Gráfico guardado en {grafico_path}")
+    plt.savefig(os.path.join(DOCS, "historial_gasolina.png"))
+    print("Gráfico guardado en docs/historial_gasolina.png")
 
-# --- Gasolinera más barata HOY ---
-df_hoy = df[df['fecha'] == datetime.now().strftime("%Y-%m-%d")]
+# --- Gasolinera más barata de hoy ---
+hoy_str = datetime.now().strftime("%Y-%m-%d")
+df_hoy = df[df['fecha'] == hoy_str]
+
 if len(df_hoy) > 0 and df_hoy['precio'].max() > 0:
     min_row = df_hoy.loc[df_hoy['precio'].idxmin()]
     barata_texto = f"💰 {min_row['estacion']} - {min_row['direccion']}: {min_row['precio']} € ¡Mejor precio!"
 else:
-    barata_texto = "No hay precios válidos"
+    barata_texto = "No hay precios válidos hoy"
 
 # --- Generar JS para la web ---
 js_code = f'document.getElementById("barata").textContent = "{barata_texto}";'
