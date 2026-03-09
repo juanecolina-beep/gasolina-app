@@ -1,3 +1,1 @@
-
-document.getElementById("barata").textContent = "No hay precios válidos";
-document.getElementById("link_csv").href = "precios_gasolina_2026-03-09.csv";
+document.getElementById("barata").textContent = "💰 REPSOL - CR A-4, 32: 1.695 € ¡Mejor precio!";
