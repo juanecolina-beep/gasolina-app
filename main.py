@@ -58,6 +58,7 @@ if not data:
 else:
     lista = data.get("ListaEESSPrecio", [])
     precios = []
+    fecha_hoy = datetime.now().strftime("%Y-%m-%d")
     for e in lista:
         if MARCA in e.get("Rótulo", "").upper() and MUNICIPIO in e.get("Municipio", "").upper():
             precio = e.get(TIPO)
@@ -65,7 +66,7 @@ else:
                 try:
                     precio_f = float(precio.replace(",", "."))
                     precios.append({
-                        "fecha": datetime.now().strftime("%Y-%m-%d"),
+                        "fecha": fecha_hoy,
                         "estacion": e.get("Rótulo"),
                         "direccion": e.get("Dirección"),
                         "precio": precio_f
@@ -114,7 +115,7 @@ else:
 df.to_csv(CSV_PATH, index=False, sep=';')
 print(f"CSV guardado en {CSV_PATH}")
 
-# --- Generar gráfico histórico ---
+# --- Gráfico histórico ---
 if len(df) > 0:
     plt.figure(figsize=(8,5))
     for dir in df["direccion"].unique():
@@ -131,10 +132,8 @@ if len(df) > 0:
     print(f"Gráfico guardado en {grafico_path}")
 
 # --- Gasolinera más barata del día ---
-hoy_str = datetime.now().strftime("%Y-%m-%d")
-df_hoy = df[df['fecha'] == hoy_str]
-
-if len(df_hoy) > 0 and df_hoy['precio'].max() > 0:
+df_hoy = df[df['fecha'] == fecha_hoy]  # solo precios del día actual
+if len(df_hoy) > 0:
     min_row = df_hoy.loc[df_hoy['precio'].idxmin()]
     barata_texto = f"💰 {min_row['estacion']} - {min_row['direccion']}: {min_row['precio']} € ¡Mejor precio!"
 else:
