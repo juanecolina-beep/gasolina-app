@@ -29,29 +29,25 @@ def obtener_api(max_intentos=5, delay=10):
     HEADERS = {"User-Agent": "Mozilla/5.0"}
     for intento in range(max_intentos):
         try:
-            print(f"Consultando API del Ministerio... intento {intento+1}")
             response = requests.get(URL, headers=HEADERS, timeout=20)
             response.raise_for_status()
             return response.json()
         except Exception as e:
-            print(f"Error al consultar API (intento {intento+1}): {e}")
-            if intento < max_intentos - 1:
+            print(f"Error intento {intento+1}: {e}")
+            if intento < max_intentos-1:
                 time.sleep(delay)
-    print("No se pudo obtener datos de la API después de varios intentos")
     return None
 
 # --- Obtener datos ---
 data = obtener_api()
 
-# --- Procesar datos ---
 if not data:
-    print("API caída, usando CSV anterior si existe")
+    print("API caída, uso CSV anterior si existe")
     if os.path.exists(CSV_PATH):
         df = pd.read_csv(CSV_PATH, sep=';')
     else:
         df = pd.DataFrame([{"fecha":"Error","estacion":"No hay datos","direccion":"No hay datos","precio":0}])
         df.to_csv(CSV_PATH, index=False, sep=';')
-        exit(0)
 else:
     lista = data.get("ListaEESSPrecio", [])
     precios = []
@@ -68,15 +64,13 @@ else:
                     })
                 except:
                     pass
-
     if not precios:
-        print("No se encontraron estaciones Repsol en Seseña")
         if os.path.exists(CSV_PATH):
             df = pd.read_csv(CSV_PATH, sep=';')
         else:
             df = pd.DataFrame([{"fecha":"Error","estacion":"No hay datos","direccion":"No hay datos","precio":0}])
     else:
-        # --- Guardar en SQLite y evitar duplicados ---
+        # Guardar en SQLite
         conn = sqlite3.connect(DB)
         cursor = conn.cursor()
         cursor.execute("""
@@ -89,7 +83,6 @@ else:
             )
         """)
         conn.commit()
-
         for p in precios:
             cursor.execute("""
                 SELECT 1 FROM precios_gasolina WHERE fecha=? AND estacion=? AND direccion=?
@@ -104,15 +97,15 @@ else:
         df = pd.read_sql_query("SELECT * FROM precios_gasolina", conn)
         conn.close()
 
-# --- Guardar CSV ---
+# --- Guardar CSV actualizado ---
 df.to_csv(CSV_PATH, index=False, sep=';')
 print(f"CSV guardado en {CSV_PATH}")
 
 # --- Gráfico histórico ---
-if len(df) > 0:
+if len(df)>0:
     plt.figure(figsize=(8,5))
     for dir in df["direccion"].unique():
-        sub = df[df["direccion"] == dir]
+        sub = df[df["direccion"]==dir]
         plt.plot(sub["fecha"], sub["precio"], marker="o", label=dir)
     plt.title("Gasolina 95 Repsol - Seseña")
     plt.xlabel("Fecha")
@@ -124,14 +117,13 @@ if len(df) > 0:
     print(f"Gráfico guardado en {GRAFICO_PATH}")
 
 # --- Gasolinera más barata ---
-if len(df) > 0 and df['precio'].max() > 0:
+if len(df)>0 and df['precio'].max()>0:
     min_row = df.loc[df['precio'].idxmin()]
     barata_texto = f"💰 {min_row['estacion']} - {min_row['direccion']}: {min_row['precio']} € ¡Mejor precio!"
 else:
     barata_texto = "No hay precios válidos"
 
-# --- JS para la web ---
-js_code = f'document.getElementById("barata").textContent = "{barata_texto}";'
+# --- Generar JS directo ---
 with open(JS_PATH, "w", encoding="utf-8") as f:
-    f.write(js_code)
+    f.write(f'document.getElementById("barata").textContent = "{barata_texto}";')
 print(f"JS actualizado en {JS_PATH}")
