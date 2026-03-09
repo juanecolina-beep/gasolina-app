@@ -1,1 +1,1 @@
-document.getElementById("barata").textContent = "💰 REPSOL - CR A-4, 32: 1.685 € ¡Mejor precio!";
+document.getElementById("barata").textContent = "💰 REPSOL - CR A-4, 32: 1.695 € ¡Mejor precio!";
