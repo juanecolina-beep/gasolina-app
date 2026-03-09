@@ -4,7 +4,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import sqlite3
-from datetime import datetime, date
+from datetime import datetime
 import os
 import time
 
@@ -22,6 +22,7 @@ JS_DIR = os.path.join(DOCS, "js")
 os.makedirs(DOCS, exist_ok=True)
 os.makedirs(JS_DIR, exist_ok=True)
 
+# CSV dentro de docs (para GitHub Pages)
 CSV_PATH = os.path.join(DOCS, "precios_gasolina.csv")
 
 # --- Función para consultar API con reintentos ---
@@ -43,6 +44,9 @@ def obtener_api(max_intentos=5, delay=10):
 # --- Obtener datos ---
 data = obtener_api()
 
+# --- DataFrame final ---
+df = pd.DataFrame()
+
 # --- Usar último CSV si falla la API ---
 if not data:
     if os.path.exists(CSV_PATH):
@@ -57,6 +61,8 @@ if not data:
 else:
     lista = data.get("ListaEESSPrecio", [])
     precios = []
+    hoy_str = datetime.now().strftime("%Y-%m-%d")
+
     for e in lista:
         if MARCA in e.get("Rótulo", "").upper() and MUNICIPIO in e.get("Municipio", "").upper():
             precio = e.get(TIPO)
@@ -64,13 +70,14 @@ else:
                 try:
                     precio_f = float(precio.replace(",", "."))
                     precios.append({
-                        "fecha": date.today().isoformat(),
+                        "fecha": hoy_str,
                         "estacion": e.get("Rótulo"),
                         "direccion": e.get("Dirección"),
                         "precio": precio_f
                     })
                 except:
                     pass
+
     if not precios:
         print("No se encontraron estaciones Repsol en Seseña")
         if os.path.exists(CSV_PATH):
@@ -81,7 +88,7 @@ else:
                 f.write("Error;No hay datos;No hay datos;0\n")
             exit(0)
     else:
-        # Guardar en SQLite
+        # --- Guardar en SQLite ---
         conn = sqlite3.connect(DB)
         cursor = conn.cursor()
         cursor.execute("""
@@ -94,6 +101,7 @@ else:
         )
         """)
         conn.commit()
+
         for p in precios:
             cursor.execute("""
             SELECT 1 FROM precios_gasolina
@@ -105,12 +113,10 @@ else:
             INSERT INTO precios_gasolina (fecha, estacion, direccion, precio)
             VALUES (?, ?, ?, ?)
             """, (p["fecha"], p["estacion"], p["direccion"], p["precio"]))
+
         conn.commit()
         df = pd.read_sql_query("SELECT * FROM precios_gasolina", conn)
         conn.close()
-
-# --- Asegurar que la columna fecha sea datetime ---
-df['fecha'] = pd.to_datetime(df['fecha'], format="%Y-%m-%d", errors='coerce')
 
 # --- Guardar CSV actualizado ---
 df.to_csv(CSV_PATH, index=False, sep=';')
@@ -133,12 +139,12 @@ if len(df) > 0:
     print(f"Gráfico guardado en {grafico_path}")
 
 # --- Gasolinera más barata HOY ---
-df_hoy = df[df['fecha'].dt.date == date.today()]
-if len(df_hoy) > 0:
+df_hoy = df[df['fecha'] == datetime.now().strftime("%Y-%m-%d")]
+if len(df_hoy) > 0 and df_hoy['precio'].max() > 0:
     min_row = df_hoy.loc[df_hoy['precio'].idxmin()]
     barata_texto = f"💰 {min_row['estacion']} - {min_row['direccion']}: {min_row['precio']} € ¡Mejor precio!"
 else:
-    barata_texto = "No hay precios válidos hoy"
+    barata_texto = "No hay precios válidos"
 
 # --- Generar JS para la web ---
 js_code = f'document.getElementById("barata").textContent = "{barata_texto}";'
