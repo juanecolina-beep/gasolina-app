@@ -18,6 +18,7 @@ DB = "gasolina.db"
 DOCS = "docs"
 JS_DIR = os.path.join(DOCS, "js")
 
+# Crear carpetas necesarias
 os.makedirs(DOCS, exist_ok=True)
 os.makedirs(JS_DIR, exist_ok=True)
 
@@ -52,11 +53,11 @@ if not data:
         with open(CSV_PATH, "w", encoding="utf-8") as f:
             f.write("fecha;estacion;direccion;precio\n")
             f.write("Error;No hay datos;No hay datos;0\n")
+        print(f"CSV vacío generado en {CSV_PATH}")
         exit(0)
 else:
     lista = data.get("ListaEESSPrecio", [])
     precios = []
-    hoy_str = datetime.now().strftime("%Y-%m-%d")
     for e in lista:
         if MARCA in e.get("Rótulo", "").upper() and MUNICIPIO in e.get("Municipio", "").upper():
             precio = e.get(TIPO)
@@ -64,14 +65,13 @@ else:
                 try:
                     precio_f = float(precio.replace(",", "."))
                     precios.append({
-                        "fecha": hoy_str,
+                        "fecha": datetime.now().strftime("%Y-%m-%d"),
                         "estacion": e.get("Rótulo"),
                         "direccion": e.get("Dirección"),
                         "precio": precio_f
                     })
                 except:
                     pass
-
     if not precios:
         print("No se encontraron estaciones Repsol en Seseña")
         if os.path.exists(CSV_PATH):
@@ -95,7 +95,6 @@ else:
         )
         """)
         conn.commit()
-
         for p in precios:
             cursor.execute("""
             SELECT 1 FROM precios_gasolina
@@ -108,7 +107,6 @@ else:
             VALUES (?, ?, ?, ?)
             """, (p["fecha"], p["estacion"], p["direccion"], p["precio"]))
         conn.commit()
-
         df = pd.read_sql_query("SELECT * FROM precios_gasolina", conn)
         conn.close()
 
@@ -128,10 +126,11 @@ if len(df) > 0:
     plt.xticks(rotation=45)
     plt.legend()
     plt.tight_layout()
-    plt.savefig(os.path.join(DOCS, "historial_gasolina.png"))
-    print("Gráfico guardado en docs/historial_gasolina.png")
+    grafico_path = os.path.join(DOCS, "historial_gasolina.png")
+    plt.savefig(grafico_path)
+    print(f"Gráfico guardado en {grafico_path}")
 
-# --- Gasolinera más barata de hoy ---
+# --- Gasolinera más barata del día ---
 hoy_str = datetime.now().strftime("%Y-%m-%d")
 df_hoy = df[df['fecha'] == hoy_str]
 
