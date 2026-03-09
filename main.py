@@ -44,7 +44,7 @@ def obtener_api(max_intentos=5, delay=10):
 # --- Obtener datos ---
 data = obtener_api()
 
-# --- Si falla la API, usar último CSV ---
+# --- Usar último CSV si falla la API ---
 if not data:
     if os.path.exists(CSV_PATH):
         print("API caída, usando CSV anterior")
@@ -117,8 +117,6 @@ print(f"CSV guardado en {CSV_PATH}")
 # --- Generar gráfico histórico ---
 if len(df) > 0:
     plt.figure(figsize=(8,5))
-    df['fecha'] = pd.to_datetime(df['fecha'], format='%Y-%m-%d')
-    df = df.sort_values('fecha')
     for dir in df["direccion"].unique():
         sub = df[df["direccion"] == dir]
         plt.plot(sub["fecha"], sub["precio"], marker="o", label=dir)
@@ -132,16 +130,19 @@ if len(df) > 0:
     plt.savefig(grafico_path)
     print(f"Gráfico guardado en {grafico_path}")
 
-# --- Gasolinera más barata ---
-if len(df) > 0 and df['precio'].max() > 0:
-    min_row = df.loc[df['precio'].idxmin()]
-    barata_texto = f"💰 {min_row['estacion']} - {min_row['direccion']}: {min_row['precio']} € ¡Mejor precio!"
+# --- Gasolinera más barata del día actual ---
+hoy = datetime.now().strftime("%Y-%m-%d")
+df_hoy = df[df['fecha'] == hoy]
+
+if len(df_hoy) > 0 and df_hoy['precio'].max() > 0:
+    min_row = df_hoy.loc[df_hoy['precio'].idxmin()]
+    barata_texto = f"💰 {min_row['estacion']} - {min_row['direccion']}: {min_row['precio']} € ¡Mejor precio hoy!"
 else:
-    barata_texto = "No hay precios válidos"
+    barata_texto = "No hay precios válidos para hoy"
 
 # --- Generar JS para la web ---
 js_code = f'document.getElementById("barata").textContent = "{barata_texto}";'
 js_path = os.path.join(JS_DIR, "script.js")
 with open(js_path, "w", encoding="utf-8") as f:
     f.write(js_code)
-print(f"JS actualizado en {js_path}")
+print(f"JS actualizado en {js_path} con el precio más barato de hoy")
