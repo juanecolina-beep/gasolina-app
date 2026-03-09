@@ -4,7 +4,6 @@
 <meta charset="utf-8">
 <title>Gasolina Repsol Seseña</title>
 </head>
-
 <body>
 
 <h1>Gasolina 95 Repsol - Seseña</h1>
@@ -16,14 +15,8 @@
 <p id="barata">Cargando...</p>
 
 <h2>Descargar histórico de precios</h2>
-<a id="csvlink" href="precios_gasolina.csv" download>CSV de precios</a>
+<a href="precios_gasolina.csv" download>CSV de precios</a>
 
 <script src="js/script.js"></script>
-<script>
-  // Forzar que el CSV no se cachee
-  const csvLink = document.getElementById("csvlink");
-  csvLink.href = "precios_gasolina.csv?v=" + Date.now();
-</script>
-
 </body>
 </html>
