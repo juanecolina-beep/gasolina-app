@@ -2,7 +2,7 @@ name: Actualizar precios gasolina
 
 on:
   schedule:
-    - cron: "0 8 * * *"  # Ejecutar cada día a las 08:00 UTC
+    - cron: "0 8 * * *"
   workflow_dispatch:
 
 permissions:
@@ -11,33 +11,28 @@ permissions:
 jobs:
   actualizar:
     runs-on: ubuntu-latest
-
     steps:
-      # Clonar repositorio
       - name: Clonar repositorio
         uses: actions/checkout@v3
 
-      # Configurar Python
       - name: Configurar Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
 
-      # Instalar dependencias
       - name: Instalar dependencias
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
 
-      # Ejecutar script principal
       - name: Ejecutar main.py
         run: python main.py
 
-      # Commit y push solo de los archivos generados en docs/
       - name: Commit cambios automáticos
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
+          # Solo agregar los archivos dentro de docs/ que GitHub Pages usa
           git add docs/precios_gasolina.csv docs/historial_gasolina.png docs/js/script.js
           git diff --cached --quiet || git commit -m "Actualizar datos gasolina"
           git push
