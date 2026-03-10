@@ -1,1 +1,5 @@
-document.getElementById("barata").textContent = "💰 REPSOL - CR A-4, 32: 1.695 € ¡Mejor precio!";
+
+document.getElementById("barata").textContent = "💰 REPSOL - AUTOVIA A-4 KM. 36,5: 1.709 € ¡Mejor precio!";
+const csv_link = document.getElementById("csvlink");
+csv_link.href = "precios_gasolina_2026-03-10.csv?v=" + Date.now();
+csv_link.download = "precios_gasolina_2026-03-10.csv";
