@@ -1,5 +1,5 @@
 
-document.getElementById("barata").textContent = "💰 REPSOL - AUTOVIA A-4 KM. 36,5: 1.805 € ¡Mejor precio!";
+document.getElementById("barata").textContent = "💰 No hay datos - No hay datos: 0 € ¡Mejor precio!";
 const csv_link = document.getElementById("csvlink");
-csv_link.href = "precios_gasolina_2026-03-18.csv?v=" + Date.now();
-csv_link.download = "precios_gasolina_2026-03-18.csv";
+csv_link.href = "precios_gasolina_2026-03-19.csv?v=" + Date.now();
+csv_link.download = "precios_gasolina_2026-03-19.csv";
