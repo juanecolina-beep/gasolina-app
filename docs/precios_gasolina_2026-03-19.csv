@@ -1,2 +1,3 @@
-fecha;estacion;direccion;precio
-2026-03-19;No hay datos;No hay datos;0
+id;fecha;estacion;direccion;precio
+25;2026-03-19;REPSOL;AUTOVIA A-4 KM. 36,5;1.809
+26;2026-03-19;REPSOL;CR A-4, 32;1.809
