@@ -12,46 +12,31 @@
     <p id="barata">Cargando...</p>
 
     <h2>📊 Gráfico histórico gasolina</h2>
-    <img src="historial_gasolina.png" width="700" alt="Gráfico histórico de precios gasolina">
+    <img id="img_gasolina" src="historial_gasolina.png" width="700" alt="Gráfico histórico gasolina">
 
     <h2>📥 Descargar histórico de precios</h2>
     <a id="csvlink" href="precios_gasolina.csv?v=0" download>CSV de precios</a>
 
-    <!-- 🔌 NUEVA SECCIÓN ENERGÍA -->
     <h2>⚡ Gráfico histórico luz y gas</h2>
-    <img src="historial_energia.png" width="700" alt="Gráfico histórico luz y gas">
+    <img id="img_energia" src="historial_energia.png" width="700" alt="Gráfico histórico luz y gas">
 
     <p>⚡ Luz hoy: <span id="luz">Cargando...</span></p>
     <p>🔥 Gas hoy: <span id="gas">Cargando...</span></p>
 
     <script>
-        // Forzar descarga del CSV más reciente
-        const csvLink = document.getElementById("csvlink");
-        if(csvLink) {
-            csvLink.href = "precios_gasolina.csv?v=" + Date.now();
-            csvLink.download = "precios_gasolina.csv";
-        }
+        // Valores por defecto antes de cargar JS dinámico
+        const timestamp = Date.now();
+        document.getElementById("csvlink").href = "precios_gasolina.csv?v=" + timestamp;
+        document.getElementById("img_gasolina").src = "historial_gasolina.png?v=" + timestamp;
+        document.getElementById("img_energia").src = "historial_energia.png?v=" + timestamp;
 
-        // Valores de luz y gas por defecto hasta que el JS se ejecute
-        const luzElem = document.getElementById("luz");
-        const gasElem = document.getElementById("gas");
-        if(luzElem && (!luzElem.textContent || luzElem.textContent === "Cargando...")) {
-            luzElem.textContent = "Cargando...";
-        }
-        if(gasElem && (!gasElem.textContent || gasElem.textContent === "Cargando...")) {
-            gasElem.textContent = "Cargando...";
-        }
-
-        // Forzar refresco de imágenes de gráficos para evitar cache
-        document.querySelectorAll('img').forEach(img => {
-            img.src = img.src.split('?')[0] + "?v=" + Date.now();
-        });
-
-        // Cargar dinámicamente el JS generado por main.py para evitar caché
-        const script = document.createElement("script");
-        script.src = "js/script.js?v=" + Date.now();
-        document.body.appendChild(script);
+        document.getElementById("barata").textContent = "Cargando...";
+        document.getElementById("luz").textContent = "Cargando...";
+        document.getElementById("gas").textContent = "Cargando...";
     </script>
+
+    <!-- JS generado automáticamente -->
+    <script src="js/script.js"></script>
 
 </body>
 </html>
