@@ -1,10 +1,129 @@
+import requests
+import pandas as pd
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import sqlite3
+from datetime import datetime
+import os
+import time
+
+# =========================
+# Configuración
+# =========================
+URL = "https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/"
+MARCA = "REPSOL"
+MUNICIPIO = "SESEÑA"
+TIPO = "Precio Gasolina 95 E5"
+DB = "gasolina.db"
+
+DOCS = "docs"
+JS_DIR = os.path.join(DOCS, "js")
+os.makedirs(DOCS, exist_ok=True)
+os.makedirs(JS_DIR, exist_ok=True)
+
+fecha_hoy = datetime.now().strftime("%Y-%m-%d")
+CSV_PATH = os.path.join(DOCS, f"precios_gasolina_{fecha_hoy}.csv")
+
+# =========================
+# Funciones de energía
+# =========================
+def obtener_precio_luz():
+    try:
+        url = "https://apidatos.ree.es/es/datos/mercados/precios-mercados-tiempo-real"
+        params = {
+            "start_date": f"{fecha_hoy}T00:00",
+            "end_date": f"{fecha_hoy}T23:59",
+            "time_trunc": "hour"
+        }
+        response = requests.get(url, params=params, timeout=20)
+        data = response.json()
+        valores = data["included"][0]["attributes"]["values"]
+        precios = [v["value"] for v in valores if v["value"] is not None]
+        if precios:
+            media_mwh = sum(precios) / len(precios)
+            return round(media_mwh / 1000, 3)  # €/kWh
+    except Exception as e:
+        print("Error obteniendo luz:", e)
+    return None
+
+def obtener_precio_gas():
+    return 0.042  # TUR aproximado €/kWh
+
+# =========================
+# API gasolina
+# =========================
+def obtener_api(max_intentos=5, delay=10):
+    HEADERS = {"User-Agent": "Mozilla/5.0"}
+    for intento in range(max_intentos):
+        try:
+            print(f"Consultando API del Ministerio... intento {intento+1}")
+            response = requests.get(URL, headers=HEADERS, timeout=20)
+            response.raise_for_status()
+            return response.json()
+        except Exception as e:
+            print(f"Error (intento {intento+1}/{max_intentos}): {e}")
+            if intento < max_intentos - 1:
+                time.sleep(delay)
+    print("No se pudo obtener datos de la API")
+    return None
+
+# =========================
+# Datos gasolina
+# =========================
+data = obtener_api()
+precios = []
+if data:
+    for e in data.get("ListaEESSPrecio", []):
+        if MARCA in e.get("Rótulo","").upper() and MUNICIPIO in e.get("Municipio","").upper():
+            precio = e.get(TIPO)
+            if precio and precio.strip():
+                try:
+                    precios.append({
+                        "fecha": fecha_hoy,
+                        "estacion": e.get("Rótulo"),
+                        "direccion": e.get("Dirección"),
+                        "precio": float(precio.replace(",","."))
+                    })
+                except:
+                    pass
+
+# =========================
+# CSV diario
+# =========================
+df_hoy = pd.DataFrame(precios) if precios else pd.DataFrame([{
+    "fecha": fecha_hoy, "estacion":"No hay datos", "direccion":"No hay datos", "precio":0
+}])
+df_hoy.to_csv(CSV_PATH, index=False, sep=';')
+print(f"CSV diario guardado en {CSV_PATH}")
+
+# =========================
+# Gráfico histórico gasolina
+# =========================
+conn = sqlite3.connect(DB)
+df = pd.read_sql_query("SELECT * FROM precios_gasolina", conn)
+conn.close()
+
+plt.figure(figsize=(8,5))
+for dir in df["direccion"].unique():
+    sub = df[df["direccion"]==dir]
+    plt.plot(sub["fecha"], sub["precio"], marker="o", label=dir)
+plt.title("Gasolina 95 Repsol - Seseña")
+plt.xlabel("Fecha")
+plt.ylabel("Precio (€)")
+plt.xticks(rotation=45)
+plt.legend()
+plt.tight_layout()
+plt.savefig(os.path.join(DOCS,"historial_gasolina.png"))
+print("Gráfico gasolina guardado")
+
 # =========================
 # SQLite gasolina + energía
 # =========================
 conn = sqlite3.connect(DB)
 cursor = conn.cursor()
 
-# Tabla gasolina
+# Tablas
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS precios_gasolina (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -14,8 +133,6 @@ CREATE TABLE IF NOT EXISTS precios_gasolina (
     precio REAL
 )
 """)
-
-# Tabla energía
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS energia (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -26,7 +143,7 @@ CREATE TABLE IF NOT EXISTS energia (
 """)
 conn.commit()
 
-# Insert gasolina si no existe
+# Insert gasolina
 for p in precios:
     cursor.execute("""
     SELECT 1 FROM precios_gasolina WHERE fecha=? AND estacion=? AND direccion=?
@@ -37,7 +154,9 @@ for p in precios:
         VALUES (?, ?, ?, ?)
         """, (p["fecha"], p["estacion"], p["direccion"], p["precio"]))
 
-# Insert energía si no existe
+# Insert energía
+precio_luz = obtener_precio_luz()
+precio_gas = obtener_precio_gas()
 cursor.execute("SELECT 1 FROM energia WHERE fecha=?", (fecha_hoy,))
 if not cursor.fetchone():
     cursor.execute("""
@@ -47,9 +166,25 @@ conn.commit()
 conn.close()
 
 # =========================
+# Gráfico luz y gas
+# =========================
+plt.figure(figsize=(8,5))
+plt.plot([fecha_hoy], [precio_luz if precio_luz else 0], marker="o", color="orange", label="Luz €/kWh")
+plt.plot([fecha_hoy], [precio_gas], marker="o", color="red", label="Gas €/kWh")
+plt.title("Energía - Luz y Gas")
+plt.xlabel("Fecha")
+plt.ylabel("€/kWh")
+plt.xticks(rotation=45)
+plt.legend()
+plt.tight_layout()
+plt.savefig(os.path.join(DOCS,"historial_energia.png"))
+print("Gráfico luz y gas guardado")
+
+# =========================
 # JS actualizado para web
 # =========================
-barata_texto = f"💰 {df_hoy.loc[df_hoy['precio'].idxmin()]['estacion']} - {df_hoy.loc[df_hoy['precio'].idxmin()]['direccion']}: {df_hoy.loc[df_hoy['precio'].idxmin()]['precio']} € ¡Mejor precio!"
+min_row = df_hoy.loc[df_hoy['precio'].idxmin()]
+barata_texto = f"💰 {min_row['estacion']} - {min_row['direccion']}: {min_row['precio']} € ¡Mejor precio!"
 
 estado_luz = "Sin datos"
 if precio_luz is not None:
