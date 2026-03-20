@@ -24,23 +24,16 @@
     <p>🔥 Gas hoy: <span id="gas">Cargando...</span></p>
 
     <script>
-        // Valores iniciales y refresco por defecto
+        // Forzar refresco inicial de gráficos y CSV
         const ts = Date.now();
-        const csvLink = document.getElementById("csvlink");
-        const imgGas = document.getElementById("img_gasolina");
-        const imgEner = document.getElementById("img_energia");
-
-        if(csvLink) csvLink.href = "precios_gasolina.csv?v=" + ts;
-        if(imgGas) imgGas.src = "historial_gasolina.png?v=" + ts;
-        if(imgEner) imgEner.src = "historial_energia.png?v=" + ts;
+        document.getElementById("csvlink").href = "precios_gasolina.csv?v=" + ts;
+        document.getElementById("img_gasolina").src = "historial_gasolina.png?v=" + ts;
+        document.getElementById("img_energia").src = "historial_energia.png?v=" + ts;
 
         // Valores por defecto
-        const barataElem = document.getElementById("barata");
-        const luzElem = document.getElementById("luz");
-        const gasElem = document.getElementById("gas");
-        if(barataElem) barataElem.textContent = "Cargando...";
-        if(luzElem) luzElem.textContent = "Cargando...";
-        if(gasElem) gasElem.textContent = "Cargando...";
+        document.getElementById("barata").textContent = "Cargando...";
+        document.getElementById("luz").textContent = "Cargando...";
+        document.getElementById("gas").textContent = "Cargando...";
     </script>
 
     <!-- JS generado automáticamente por main.py -->
