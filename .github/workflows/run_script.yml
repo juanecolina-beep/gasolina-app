@@ -31,8 +31,8 @@ jobs:
           pip install -r requirements.txt
           pip install matplotlib pandas requests
 
-      # 4. Ejecutar script principal
-      - name: Ejecutar main.py (gasolina + luz + gas)
+      # 4. Ejecutar main.py (gasolina + luz + gas + JS)
+      - name: Ejecutar main.py
         run: python main.py
 
       # 5. Commit y push automáticos si hay cambios
@@ -41,10 +41,10 @@ jobs:
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
-          # Añadir CSV, gráficos y JS generados por main.py
+          # Añadir CSV, gráficos y JS generados
           git add docs/*.csv docs/*.png docs/js/*.js
 
-          # Commit solo si hay cambios
+          # Verificar cambios
           if git diff --cached --quiet; then
             echo "No hay cambios"
           else
