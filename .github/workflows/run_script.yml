@@ -29,6 +29,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install matplotlib pandas requests
 
       # 4. Ejecutar script principal
       - name: Ejecutar main.py (gasolina + luz + gas)
@@ -39,11 +40,13 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add .
+
+          # Añadir todos los CSV y gráficos generados por main.py
+          git add docs/*.csv docs/*.png docs/js/*.js
 
           if git diff --cached --quiet; then
             echo "No hay cambios"
           else
-            git commit -m "Actualizar gasolina + luz + gas ($(date '+%Y-%m-%d %H:%M'))"
+            git commit -m "Actualizar gasolina + luz + gas + gráficos ($(date '+%Y-%m-%d %H:%M'))"
             git push
           fi
