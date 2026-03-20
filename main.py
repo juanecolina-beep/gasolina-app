@@ -24,7 +24,7 @@ fecha_hoy = datetime.now().strftime("%Y-%m-%d")
 CSV_PATH = os.path.join(DOCS, f"precios_gasolina_{fecha_hoy}.csv")
 
 # =========================
-# 🔌 NUEVO: PRECIO LUZ
+# 🔌 PRECIO LUZ
 # =========================
 def obtener_precio_luz():
     try:
@@ -42,18 +42,17 @@ def obtener_precio_luz():
 
         if precios:
             media_mwh = sum(precios) / len(precios)
-            # Convertir a €/kWh
-            return round(media_mwh / 1000, 3)
+            return round(media_mwh / 1000, 3)  # €/kWh
     except Exception as e:
         print("Error obteniendo luz:", e)
 
     return None
 
 # =========================
-# 🔥 NUEVO: PRECIO GAS
+# 🔥 PRECIO GAS
 # =========================
 def obtener_precio_gas():
-    return 0.042  # TUR aproximado
+    return 0.042  # TUR aproximado €/kWh
 
 # =========================
 # API gasolina
@@ -73,14 +72,14 @@ def obtener_api(max_intentos=5, delay=10):
     print("No se pudo obtener datos de la API después de varios intentos")
     return None
 
-# Obtener datos gasolina
+# =========================
+# Datos gasolina
+# =========================
 data = obtener_api()
-
 precios = []
 if data:
-    lista = data.get("ListaEESSPrecio", [])
-    for e in lista:
-        if MARCA in e.get("Rótulo", "").upper() and MUNICIPIO in e.get("Municipio", "").upper():
+    for e in data.get("ListaEESSPrecio", []):
+        if MARCA in e.get("Rótulo","").upper() and MUNICIPIO in e.get("Municipio","").upper():
             precio = e.get(TIPO)
             if precio and precio.strip():
                 try:
@@ -88,12 +87,14 @@ if data:
                         "fecha": fecha_hoy,
                         "estacion": e.get("Rótulo"),
                         "direccion": e.get("Dirección"),
-                        "precio": float(precio.replace(",", "."))
+                        "precio": float(precio.replace(",","."))
                     })
                 except:
                     pass
 
-# SQLite
+# =========================
+# SQLite gasolina
+# =========================
 conn = sqlite3.connect(DB)
 cursor = conn.cursor()
 cursor.execute("""
@@ -122,17 +123,21 @@ conn.commit()
 df = pd.read_sql_query("SELECT * FROM precios_gasolina", conn)
 conn.close()
 
+# =========================
 # CSV diario
-df_hoy = df[df['fecha'] == fecha_hoy]
-if len(df_hoy) == 0:
-    df_hoy = pd.DataFrame([{"fecha": fecha_hoy, "estacion":"No hay datos", "direccion":"No hay datos", "precio":0}])
+# =========================
+df_hoy = df[df['fecha']==fecha_hoy]
+if len(df_hoy)==0:
+    df_hoy = pd.DataFrame([{"fecha":fecha_hoy, "estacion":"No hay datos","direccion":"No hay datos","precio":0}])
 df_hoy.to_csv(CSV_PATH, index=False, sep=';')
 print(f"CSV diario guardado en {CSV_PATH}")
 
-# Gráfico
+# =========================
+# Gráfico histórico gasolina
+# =========================
 plt.figure(figsize=(8,5))
 for dir in df["direccion"].unique():
-    sub = df[df["direccion"] == dir]
+    sub = df[df["direccion"]==dir]
     plt.plot(sub["fecha"], sub["precio"], marker="o", label=dir)
 plt.title("Gasolina 95 Repsol - Seseña")
 plt.xlabel("Fecha")
@@ -140,15 +145,17 @@ plt.ylabel("Precio (€)")
 plt.xticks(rotation=45)
 plt.legend()
 plt.tight_layout()
-plt.savefig(os.path.join(DOCS, "historial_gasolina.png"))
-print("Gráfico guardado")
+plt.savefig(os.path.join(DOCS,"historial_gasolina.png"))
+print("Gráfico gasolina guardado")
 
-# Más barata
+# =========================
+# Más barata hoy
+# =========================
 min_row = df_hoy.loc[df_hoy['precio'].idxmin()]
 barata_texto = f"💰 {min_row['estacion']} - {min_row['direccion']}: {min_row['precio']} € ¡Mejor precio!"
 
 # =========================
-# 🔌🔥 NUEVO BLOQUE ENERGÍA
+# Energía (luz y gas)
 # =========================
 precio_luz = obtener_precio_luz()
 precio_gas = obtener_precio_gas()
@@ -164,20 +171,44 @@ else:
     estado_luz = "Sin datos"
 
 # =========================
-# JS FINAL
+# Gráfico luz y gas estilo gasolina
+# =========================
+plt.figure(figsize=(8,5))
+plt.plot([fecha_hoy], [precio_luz if precio_luz else 0], marker="o", color="orange", label="Luz €/kWh")
+plt.plot([fecha_hoy], [precio_gas], marker="o", color="red", label="Gas €/kWh")
+plt.title("Energía - Luz y Gas")
+plt.xlabel("Fecha")
+plt.ylabel("€/kWh")
+plt.xticks(rotation=45)
+plt.legend()
+plt.tight_layout()
+plt.savefig(os.path.join(DOCS,"historial_energia.png"))
+print("Gráfico luz y gas guardado")
+
+# =========================
+# JS final seguro
 # =========================
 js_code = f"""
 document.getElementById("barata").textContent = "{barata_texto}";
 
-document.getElementById("luz").textContent = "{precio_luz if precio_luz else 'N/A'} €/kWh ({estado_luz})";
-document.getElementById("gas").textContent = "{precio_gas} €/kWh";
+// Luz y gas con fallback
+var luzElem = document.getElementById("luz");
+if(luzElem) {{
+    luzElem.textContent = "{precio_luz if precio_luz else 'No disponible'} €/kWh ({estado_luz})";
+}}
 
+var gasElem = document.getElementById("gas");
+if(gasElem) {{
+    gasElem.textContent = "{precio_gas} €/kWh";
+}}
+
+// CSV
 const csv_link = document.getElementById("csvlink");
 csv_link.href = "{os.path.basename(CSV_PATH)}?v=" + Date.now();
 csv_link.download = "{os.path.basename(CSV_PATH)}";
 """
 
-with open(os.path.join(JS_DIR, "script.js"), "w", encoding="utf-8") as f:
+with open(os.path.join(JS_DIR,"script.js"), "w", encoding="utf-8") as f:
     f.write(js_code)
 
-print("JS actualizado con luz y gas 🚀")
+print("JS actualizado con gasolina, luz y gas 🚀")
