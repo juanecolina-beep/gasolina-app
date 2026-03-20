@@ -29,14 +29,17 @@
         const csvLink = document.getElementById("csvlink");
         if(csvLink) {
             csvLink.href = "precios_gasolina.csv?v=" + Date.now();
+            csvLink.download = "precios_gasolina.csv";
         }
 
         // Valores de luz y gas por defecto hasta que el JS se ejecute
-        if(!document.getElementById("luz").textContent) {
-            document.getElementById("luz").textContent = "Cargando...";
+        const luzElem = document.getElementById("luz");
+        const gasElem = document.getElementById("gas");
+        if(luzElem && !luzElem.textContent) {
+            luzElem.textContent = "Cargando...";
         }
-        if(!document.getElementById("gas").textContent) {
-            document.getElementById("gas").textContent = "Cargando...";
+        if(gasElem && !gasElem.textContent) {
+            gasElem.textContent = "Cargando...";
         }
     </script>
 
