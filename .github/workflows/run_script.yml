@@ -41,7 +41,7 @@ jobs:
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
-          # Añadir todos los CSV y gráficos generados por main.py
+          # Añadir todos los CSV, gráficos y JS generados por main.py
           git add docs/*.csv docs/*.png docs/js/*.js
 
           if git diff --cached --quiet; then
@@ -49,4 +49,3 @@ jobs:
           else
             git commit -m "Actualizar gasolina + luz + gas + gráficos ($(date '+%Y-%m-%d %H:%M'))"
             git push
-          fi

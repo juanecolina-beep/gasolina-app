@@ -36,16 +36,13 @@ def obtener_precio_luz():
         }
         response = requests.get(url, params=params, timeout=20)
         data = response.json()
-
         valores = data["included"][0]["attributes"]["values"]
         precios = [v["value"] for v in valores if v["value"] is not None]
-
         if precios:
             media_mwh = sum(precios) / len(precios)
             return round(media_mwh / 1000, 3)  # €/kWh
     except Exception as e:
         print("Error obteniendo luz:", e)
-
     return None
 
 # =========================
@@ -107,7 +104,6 @@ CREATE TABLE IF NOT EXISTS precios_gasolina (
 )
 """)
 conn.commit()
-
 for p in precios:
     cursor.execute("""
     SELECT 1 FROM precios_gasolina
@@ -119,7 +115,6 @@ for p in precios:
         VALUES (?, ?, ?, ?)
         """, (p["fecha"], p["estacion"], p["direccion"], p["precio"]))
 conn.commit()
-
 df = pd.read_sql_query("SELECT * FROM precios_gasolina", conn)
 conn.close()
 
@@ -159,16 +154,14 @@ barata_texto = f"💰 {min_row['estacion']} - {min_row['direccion']}: {min_row['
 # =========================
 precio_luz = obtener_precio_luz()
 precio_gas = obtener_precio_gas()
-
-if precio_luz:
+estado_luz = "Sin datos"
+if precio_luz is not None:
     if precio_luz < 0.08:
         estado_luz = "🟢 Barata"
     elif precio_luz < 0.15:
         estado_luz = "🟡 Media"
     else:
         estado_luz = "🔴 Cara"
-else:
-    estado_luz = "Sin datos"
 
 # =========================
 # Gráfico luz y gas estilo gasolina
@@ -191,7 +184,6 @@ print("Gráfico luz y gas guardado")
 js_code = f"""
 document.getElementById("barata").textContent = "{barata_texto}";
 
-// Luz y gas con fallback
 var luzElem = document.getElementById("luz");
 if(luzElem) {{
     luzElem.textContent = "{precio_luz if precio_luz else 'No disponible'} €/kWh ({estado_luz})";
@@ -202,7 +194,6 @@ if(gasElem) {{
     gasElem.textContent = "{precio_gas} €/kWh";
 }}
 
-// CSV
 const csv_link = document.getElementById("csvlink");
 csv_link.href = "{os.path.basename(CSV_PATH)}?v=" + Date.now();
 csv_link.download = "{os.path.basename(CSV_PATH)}";

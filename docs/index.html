@@ -27,10 +27,20 @@
     <script>
         // Forzar descarga del CSV más reciente
         const csvLink = document.getElementById("csvlink");
-        csvLink.href = "precios_gasolina.csv?v=" + Date.now();
+        if(csvLink) {
+            csvLink.href = "precios_gasolina.csv?v=" + Date.now();
+        }
+
+        // Valores de luz y gas por defecto hasta que el JS se ejecute
+        if(!document.getElementById("luz").textContent) {
+            document.getElementById("luz").textContent = "Cargando...";
+        }
+        if(!document.getElementById("gas").textContent) {
+            document.getElementById("gas").textContent = "Cargando...";
+        }
     </script>
 
-    <!-- JS generado automáticamente -->
+    <!-- JS generado automáticamente por main.py -->
     <script src="js/script.js"></script>
 
 </body>
