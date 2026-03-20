@@ -24,7 +24,7 @@
     <p>🔥 Gas hoy: <span id="gas">Cargando...</span></p>
 
     <script>
-        // Valores por defecto
+        // Valores por defecto mientras carga el JS dinámico
         const ts = Date.now();
         document.getElementById("csvlink").href = "precios_gasolina.csv?v=" + ts;
         document.getElementById("img_gasolina").src = "historial_gasolina.png?v=" + ts;
@@ -35,7 +35,7 @@
         document.getElementById("gas").textContent = "Cargando...";
     </script>
 
-    <!-- JS generado por main.py -->
+    <!-- JS generado automáticamente por main.py -->
     <script src="js/script.js"></script>
 
 </body>
