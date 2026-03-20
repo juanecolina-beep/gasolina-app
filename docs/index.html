@@ -23,7 +23,23 @@
     <p>⚡ Luz hoy: <span id="luz">Cargando...</span></p>
     <p>🔥 Gas hoy: <span id="gas">Cargando...</span></p>
 
-    <!-- JS generado automáticamente -->
+    <script>
+        // Valores por defecto antes de cargar JS dinámico
+        const ts = Date.now();
+
+        // Forzar refresco de CSV y gráficos
+        document.getElementById("csvlink").href = "precios_gasolina.csv?v=" + ts;
+        document.getElementById("csvlink").download = "precios_gasolina.csv";
+        document.getElementById("img_gasolina").src = "historial_gasolina.png?v=" + ts;
+        document.getElementById("img_energia").src = "historial_energia.png?v=" + ts;
+
+        // Inicializar con "Cargando..." mientras JS dinámico se ejecuta
+        document.getElementById("barata").textContent = "Cargando...";
+        document.getElementById("luz").textContent = "Cargando...";
+        document.getElementById("gas").textContent = "Cargando...";
+    </script>
+
+    <!-- JS dinámico generado por main.py -->
     <script src="js/script.js"></script>
 
 </body>
