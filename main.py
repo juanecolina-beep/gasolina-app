@@ -98,32 +98,12 @@ df_hoy.to_csv(CSV_PATH, index=False, sep=';')
 print(f"CSV diario guardado en {CSV_PATH}")
 
 # =========================
-# Gráfico histórico gasolina
-# =========================
-conn = sqlite3.connect(DB)
-df = pd.read_sql_query("SELECT * FROM precios_gasolina", conn)
-conn.close()
-
-plt.figure(figsize=(8,5))
-for dir in df["direccion"].unique():
-    sub = df[df["direccion"]==dir]
-    plt.plot(sub["fecha"], sub["precio"], marker="o", label=dir)
-plt.title("Gasolina 95 Repsol - Seseña")
-plt.xlabel("Fecha")
-plt.ylabel("Precio (€)")
-plt.xticks(rotation=45)
-plt.legend()
-plt.tight_layout()
-plt.savefig(os.path.join(DOCS,"historial_gasolina.png"))
-print("Gráfico gasolina guardado")
-
-# =========================
 # SQLite gasolina + energía
 # =========================
 conn = sqlite3.connect(DB)
 cursor = conn.cursor()
 
-# Tablas
+# Crear tablas
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS precios_gasolina (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -143,7 +123,7 @@ CREATE TABLE IF NOT EXISTS energia (
 """)
 conn.commit()
 
-# Insert gasolina
+# Insert gasolina si no existe
 for p in precios:
     cursor.execute("""
     SELECT 1 FROM precios_gasolina WHERE fecha=? AND estacion=? AND direccion=?
@@ -154,7 +134,7 @@ for p in precios:
         VALUES (?, ?, ?, ?)
         """, (p["fecha"], p["estacion"], p["direccion"], p["precio"]))
 
-# Insert energía
+# Insert energía si no existe
 precio_luz = obtener_precio_luz()
 precio_gas = obtener_precio_gas()
 cursor.execute("SELECT 1 FROM energia WHERE fecha=?", (fecha_hoy,))
@@ -162,8 +142,27 @@ if not cursor.fetchone():
     cursor.execute("""
     INSERT INTO energia (fecha, luz, gas) VALUES (?, ?, ?)
     """, (fecha_hoy, precio_luz if precio_luz else 0, precio_gas))
+
 conn.commit()
+
+# =========================
+# Gráfico histórico gasolina
+# =========================
+df = pd.read_sql_query("SELECT * FROM precios_gasolina", conn)
 conn.close()
+
+plt.figure(figsize=(8,5))
+for dir in df["direccion"].unique():
+    sub = df[df["direccion"]==dir]
+    plt.plot(sub["fecha"], sub["precio"], marker="o", label=dir)
+plt.title("Gasolina 95 Repsol - Seseña")
+plt.xlabel("Fecha")
+plt.ylabel("Precio (€)")
+plt.xticks(rotation=45)
+plt.legend()
+plt.tight_layout()
+plt.savefig(os.path.join(DOCS,"historial_gasolina.png"))
+print("Gráfico gasolina guardado")
 
 # =========================
 # Gráfico luz y gas
@@ -195,6 +194,7 @@ if precio_luz is not None:
     else:
         estado_luz = "🔴 Cara"
 
+# Generar JS dinámico con valores de gasolina, luz y gas
 js_code = f"""
 document.getElementById('barata').textContent = "{barata_texto}";
 
@@ -208,12 +208,12 @@ if(gasElem) {{
     gasElem.textContent = "{precio_gas} €/kWh";
 }}
 
-// CSV
+// CSV actualizado sin caché
 const csv_link = document.getElementById('csvlink');
 csv_link.href = "{os.path.basename(CSV_PATH)}?v=" + Date.now();
 csv_link.download = "{os.path.basename(CSV_PATH)}";
 
-// Forzar refresco imágenes de gráficos para evitar cache
+// Forzar refresco de gráficos para evitar cache
 document.querySelectorAll('img').forEach(img => {{
     img.src = img.src.split('?')[0] + "?v=" + Date.now();
 }});
