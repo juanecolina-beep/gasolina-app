@@ -6,16 +6,21 @@
 </head>
 <body>
 
-    <h1>Gasolina 95 Repsol - Seseña</h1>
+    <h1>⛽ Gasolina 95 Repsol - Seseña</h1>
 
-    <h2>Gráfico histórico</h2>
-    <img src="historial_gasolina.png" width="700" alt="Gráfico histórico de precios">
-
-    <h2>Gasolinera más barata hoy</h2>
+    <h2>💰 Gasolinera más barata hoy</h2>
     <p id="barata">Cargando...</p>
 
-    <h2>Descargar histórico de precios</h2>
+    <h2>📊 Gráfico histórico</h2>
+    <img src="historial_gasolina.png" width="700" alt="Gráfico histórico de precios">
+
+    <h2>📥 Descargar histórico de precios</h2>
     <a id="csvlink" href="precios_gasolina.csv?v=0" download>CSV de precios</a>
+
+    <!-- 🔌 NUEVA SECCIÓN ENERGÍA -->
+    <h2>🔌 Energía hoy</h2>
+    <p>⚡ Luz: <span id="luz">Cargando...</span></p>
+    <p>🔥 Gas: <span id="gas">Cargando...</span></p>
 
     <script>
         // Forzar descarga del CSV más reciente
@@ -23,7 +28,7 @@
         csvLink.href = "precios_gasolina.csv?v=" + Date.now();
     </script>
 
-    <!-- El JS generado por main.py actualizará el precio más barato hoy -->
+    <!-- JS generado automáticamente -->
     <script src="js/script.js"></script>
 
 </body>

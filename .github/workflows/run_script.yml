@@ -1,8 +1,9 @@
-name: Actualizar precios gasolina
+name: Actualizar precios gasolina + energía
 
 on:
   schedule:
-    - cron: "0 8 * * *"  # Ejecutar cada día a las 08:00 UTC
+    # ⚡ Cada hora (la luz cambia constantemente)
+    - cron: "0 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -30,7 +31,7 @@ jobs:
           pip install -r requirements.txt
 
       # 4. Ejecutar script principal
-      - name: Ejecutar main.py
+      - name: Ejecutar main.py (gasolina + luz + gas)
         run: python main.py
 
       # 5. Commit y push automáticos si hay cambios
@@ -39,5 +40,10 @@ jobs:
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git add .
-          git diff --cached --quiet || git commit -m "Actualizar datos gasolina"
-          git push
+
+          if git diff --cached --quiet; then
+            echo "No hay cambios"
+          else
+            git commit -m "Actualizar gasolina + luz + gas ($(date '+%Y-%m-%d %H:%M'))"
+            git push
+          fi
