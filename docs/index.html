@@ -35,12 +35,17 @@
         // Valores de luz y gas por defecto hasta que el JS se ejecute
         const luzElem = document.getElementById("luz");
         const gasElem = document.getElementById("gas");
-        if(luzElem && !luzElem.textContent) {
+        if(luzElem && (!luzElem.textContent || luzElem.textContent === "Cargando...")) {
             luzElem.textContent = "Cargando...";
         }
-        if(gasElem && !gasElem.textContent) {
+        if(gasElem && (!gasElem.textContent || gasElem.textContent === "Cargando...")) {
             gasElem.textContent = "Cargando...";
         }
+
+        // Forzar refresco de imágenes de gráficos para evitar cache
+        document.querySelectorAll('img').forEach(img => {
+            img.src = img.src.split('?')[0] + "?v=" + Date.now();
+        });
     </script>
 
     <!-- JS generado automáticamente por main.py -->
