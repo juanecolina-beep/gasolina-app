@@ -42,8 +42,8 @@ def obtener_precio_luz():
         precios = [v["value"] for v in valores if v["value"] is not None]
         if precios:
             return round(sum(precios)/len(precios)/1000, 3)
-    except:
-        return None
+    except Exception as e:
+        print("Error obteniendo luz:", e)
     return None
 
 def obtener_precio_gas():
@@ -144,6 +144,8 @@ conn.close()
 # Gráficos
 # =========================
 df_all = pd.read_sql_query("SELECT * FROM precios_gasolina", sqlite3.connect(DB))
+
+# Gasolina
 plt.figure(figsize=(8,5))
 for dir in df_all["direccion"].unique():
     sub = df_all[df_all["direccion"]==dir]
@@ -156,6 +158,7 @@ plt.legend()
 plt.tight_layout()
 plt.savefig(os.path.join(DOCS,"historial_gasolina.png"))
 
+# Energía
 plt.figure(figsize=(8,5))
 plt.plot([fecha_hoy], [precio_luz if precio_luz else 0], marker="o", color="orange", label="Luz €/kWh")
 plt.plot([fecha_hoy], [precio_gas], marker="o", color="red", label="Gas €/kWh")
@@ -168,10 +171,11 @@ plt.tight_layout()
 plt.savefig(os.path.join(DOCS,"historial_energia.png"))
 
 # =========================
-# JS dinámico
+# JS dinámico definitivo
 # =========================
 min_row = df_hoy.loc[df_hoy['precio'].idxmin()]
 barata_texto = f"💰 {min_row['estacion']} - {min_row['direccion']}: {min_row['precio']} € ¡Mejor precio!"
+
 estado_luz = "Sin datos"
 if precio_luz is not None:
     if precio_luz < 0.08:
@@ -188,8 +192,9 @@ document.getElementById('gas').textContent = "{precio_gas} €/kWh";
 
 // Refrescar CSV y gráficos
 const ts = Date.now();
-document.getElementById('csvlink').href = "{os.path.basename(CSV_PATH)}?v=" + ts;
-document.getElementById('csvlink').download = "{os.path.basename(CSV_PATH)}";
+const csvLink = document.getElementById('csvlink');
+csvLink.href = "{os.path.basename(CSV_PATH)}?v=" + ts;
+csvLink.download = "{os.path.basename(CSV_PATH)}";
 document.getElementById('img_gasolina').src = "historial_gasolina.png?v=" + ts;
 document.getElementById('img_energia').src = "historial_energia.png?v=" + ts;
 """
