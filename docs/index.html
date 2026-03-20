@@ -24,18 +24,26 @@
     <p>🔥 Gas hoy: <span id="gas">Cargando...</span></p>
 
     <script>
-        // Valores por defecto antes de cargar JS dinámico
-        const timestamp = Date.now();
-        document.getElementById("csvlink").href = "precios_gasolina.csv?v=" + timestamp;
-        document.getElementById("img_gasolina").src = "historial_gasolina.png?v=" + timestamp;
-        document.getElementById("img_energia").src = "historial_energia.png?v=" + timestamp;
+        // Valores iniciales y refresco por defecto
+        const ts = Date.now();
+        const csvLink = document.getElementById("csvlink");
+        const imgGas = document.getElementById("img_gasolina");
+        const imgEner = document.getElementById("img_energia");
 
-        document.getElementById("barata").textContent = "Cargando...";
-        document.getElementById("luz").textContent = "Cargando...";
-        document.getElementById("gas").textContent = "Cargando...";
+        if(csvLink) csvLink.href = "precios_gasolina.csv?v=" + ts;
+        if(imgGas) imgGas.src = "historial_gasolina.png?v=" + ts;
+        if(imgEner) imgEner.src = "historial_energia.png?v=" + ts;
+
+        // Valores por defecto
+        const barataElem = document.getElementById("barata");
+        const luzElem = document.getElementById("luz");
+        const gasElem = document.getElementById("gas");
+        if(barataElem) barataElem.textContent = "Cargando...";
+        if(luzElem) luzElem.textContent = "Cargando...";
+        if(gasElem) gasElem.textContent = "Cargando...";
     </script>
 
-    <!-- JS generado automáticamente -->
+    <!-- JS generado automáticamente por main.py -->
     <script src="js/script.js"></script>
 
 </body>
