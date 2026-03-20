@@ -17,25 +17,34 @@ os.makedirs(JS_DIR, exist_ok=True)
 fecha_hoy = datetime.now().strftime("%Y-%m-%d")
 CSV_PATH = os.path.join(DOCS, f"precios_gasolina_{fecha_hoy}.csv")
 
-# Funciones energía
+# =========================
+# Funciones energía robustas
+# =========================
 def obtener_precio_luz():
     try:
         url = "https://apidatos.ree.es/es/datos/mercados/precios-mercados-tiempo-real"
-        params = {"start_date": f"{fecha_hoy}T00:00","end_date": f"{fecha_hoy}T23:59","time_trunc": "hour"}
+        params = {
+            "start_date": f"{fecha_hoy}T00:00",
+            "end_date": f"{fecha_hoy}T23:59",
+            "time_trunc": "hour"
+        }
         r = requests.get(url, params=params, timeout=20)
+        r.raise_for_status()
         data = r.json()
-        valores = data["included"][0]["attributes"]["values"]
-        precios = [v["value"] for v in valores if v["value"] is not None]
+        valores = data.get("included", [])[0].get("attributes", {}).get("values", [])
+        precios = [v.get("value") for v in valores if v.get("value") is not None]
         if precios:
-            return round(sum(precios)/len(precios)/1000,3)
-    except:
-        return None
+            return round(sum(precios)/len(precios)/1000, 3)
+    except Exception as e:
+        print("⚠️ Error obteniendo luz:", e)
     return None
 
 def obtener_precio_gas():
-    return 0.042
+    return 0.042  # €/kWh fijo TUR
 
+# =========================
 # API gasolina
+# =========================
 def obtener_api(max_intentos=5, delay=10):
     headers = {"User-Agent":"Mozilla/5.0"}
     for i in range(max_intentos):
@@ -43,11 +52,14 @@ def obtener_api(max_intentos=5, delay=10):
             r = requests.get(URL, headers=headers, timeout=20)
             r.raise_for_status()
             return r.json()
-        except:
+        except Exception as e:
+            print(f"Intento {i+1} error API gasolina: {e}")
             if i < max_intentos-1: time.sleep(delay)
     return None
 
+# =========================
 # Datos gasolina
+# =========================
 data = obtener_api()
 precios = []
 if data:
@@ -71,7 +83,9 @@ df_hoy = pd.DataFrame(precios) if precios else pd.DataFrame([{
 }])
 df_hoy.to_csv(CSV_PATH, index=False, sep=';')
 
+# =========================
 # SQLite gasolina + energía
+# =========================
 precio_luz = obtener_precio_luz()
 precio_gas = obtener_precio_gas()
 conn = sqlite3.connect(DB)
@@ -100,7 +114,9 @@ if not cursor.fetchone():
 conn.commit()
 conn.close()
 
+# =========================
 # Gráficos gasolina
+# =========================
 df_all = pd.read_sql_query("SELECT * FROM precios_gasolina", sqlite3.connect(DB))
 plt.figure(figsize=(8,5))
 for dir in df_all["direccion"].unique():
@@ -126,18 +142,23 @@ plt.legend()
 plt.tight_layout()
 plt.savefig(os.path.join(DOCS,"historial_energia.png"))
 
-# JS dinámico
+# =========================
+# JS dinámico final
+# =========================
 min_row = df_hoy.loc[df_hoy['precio'].idxmin()]
 barata_texto = f"💰 {min_row['estacion']} - {min_row['direccion']}: {min_row['precio']} € ¡Mejor precio!"
-estado_luz = "Sin datos"
+
 if precio_luz is not None:
     if precio_luz < 0.08: estado_luz="🟢 Barata"
     elif precio_luz < 0.15: estado_luz="🟡 Media"
     else: estado_luz="🔴 Cara"
+else:
+    estado_luz = "⚪ Sin datos"
+    precio_luz = "No disponible"
 
 js_code = f"""
 document.getElementById('barata').textContent = "{barata_texto}";
-document.getElementById('luz').textContent = "{precio_luz if precio_luz else 'No disponible'} €/kWh ({estado_luz})";
+document.getElementById('luz').textContent = "{precio_luz} €/kWh ({estado_luz})";
 document.getElementById('gas').textContent = "{precio_gas} €/kWh";
 
 const ts = Date.now();
