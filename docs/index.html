@@ -46,10 +46,12 @@
         document.querySelectorAll('img').forEach(img => {
             img.src = img.src.split('?')[0] + "?v=" + Date.now();
         });
-    </script>
 
-    <!-- JS generado automáticamente por main.py -->
-    <script src="js/script.js"></script>
+        // Cargar dinámicamente el JS generado por main.py para evitar caché
+        const script = document.createElement("script");
+        script.src = "js/script.js?v=" + Date.now();
+        document.body.appendChild(script);
+    </script>
 
 </body>
 </html>
