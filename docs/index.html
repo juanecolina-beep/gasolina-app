@@ -24,19 +24,18 @@
     <p>🔥 Gas hoy: <span id="gas">Cargando...</span></p>
 
     <script>
-        // Forzar refresco inicial de gráficos y CSV
+        // Valores por defecto
         const ts = Date.now();
         document.getElementById("csvlink").href = "precios_gasolina.csv?v=" + ts;
         document.getElementById("img_gasolina").src = "historial_gasolina.png?v=" + ts;
         document.getElementById("img_energia").src = "historial_energia.png?v=" + ts;
 
-        // Valores por defecto
         document.getElementById("barata").textContent = "Cargando...";
         document.getElementById("luz").textContent = "Cargando...";
         document.getElementById("gas").textContent = "Cargando...";
     </script>
 
-    <!-- JS generado automáticamente por main.py -->
+    <!-- JS generado por main.py -->
     <script src="js/script.js"></script>
 
 </body>
