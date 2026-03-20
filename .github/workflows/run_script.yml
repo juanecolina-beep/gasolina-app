@@ -44,7 +44,7 @@ jobs:
           # Añadir CSV, gráficos y JS generados
           git add docs/*.csv docs/*.png docs/js/*.js
 
-          # Verificar si hay cambios
+          # Verificar cambios
           if git diff --cached --quiet; then
             echo "No hay cambios"
           else
