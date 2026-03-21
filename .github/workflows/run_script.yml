@@ -2,8 +2,8 @@ name: Actualizar precios gasolina + energía
 
 on:
   schedule:
-    # ⚡ Dos veces al día: 08:00 y 20:00
-    - cron: "0 8,20 * * *"
+    # ⚡ Cada hora (la luz cambia constantemente)
+    - cron: "0 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -14,33 +14,39 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Clonar repositorio
       - name: Clonar repositorio
         uses: actions/checkout@v3
 
+      # 2. Configurar Python
       - name: Configurar Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
 
+      # 3. Instalar dependencias
       - name: Instalar dependencias
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install matplotlib pandas requests
 
+      # 4. Ejecutar main.py (gasolina + luz + gas + JS)
       - name: Ejecutar main.py
         run: python main.py
 
+      # 5. Commit y push automáticos si hay cambios
       - name: Commit y push cambios
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
+          # Añadir CSV, gráficos y JS generados
           git add docs/*.csv docs/*.png docs/js/*.js
 
+          # Verificar cambios
           if git diff --cached --quiet; then
             echo "No hay cambios"
           else
-            git commit -m "Actualizar gasolina + luz + gas ($(date '+%Y-%m-%d %H:%M'))"
+            git commit -m "Actualizar gasolina + luz + gas + gráficos ($(date '+%Y-%m-%d %H:%M'))"
             git push
-          fi
