@@ -12,34 +12,18 @@
     <p id="barata">Cargando...</p>
 
     <h2>📊 Gráfico histórico gasolina</h2>
-    <img id="img_gasolina" src="historial_gasolina.png" width="700" alt="Gráfico histórico gasolina">
+    <img id="img_gasolina" src="historial_gasolina.png" width="700">
 
     <h2>📥 Descargar histórico de precios</h2>
-    <a id="csvlink" href="precios_gasolina.csv?v=0" download>CSV de precios</a>
+    <a id="csvlink" href="#">CSV de precios</a>
 
     <h2>⚡ Gráfico histórico luz y gas</h2>
-    <img id="img_energia" src="historial_energia.png" width="700" alt="Gráfico histórico luz y gas">
+    <img id="img_energia" src="historial_energia.png" width="700">
 
     <p>⚡ Luz hoy: <span id="luz">Cargando...</span></p>
     <p>🔥 Gas hoy: <span id="gas">Cargando...</span></p>
 
-    <script>
-        // Valores por defecto antes de cargar JS dinámico
-        const ts = Date.now();
-
-        // Forzar refresco de CSV y gráficos
-        document.getElementById("csvlink").href = "precios_gasolina.csv?v=" + ts;
-        document.getElementById("csvlink").download = "precios_gasolina.csv";
-        document.getElementById("img_gasolina").src = "historial_gasolina.png?v=" + ts;
-        document.getElementById("img_energia").src = "historial_energia.png?v=" + ts;
-
-        // Inicializar con "Cargando..." mientras JS dinámico se ejecuta
-        document.getElementById("barata").textContent = "Cargando...";
-        document.getElementById("luz").textContent = "Cargando...";
-        document.getElementById("gas").textContent = "Cargando...";
-    </script>
-
-    <!-- JS dinámico generado por main.py -->
+    <!-- SOLO este script -->
     <script src="js/script.js"></script>
 
 </body>
