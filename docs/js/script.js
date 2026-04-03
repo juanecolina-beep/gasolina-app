@@ -1,58 +1,54 @@
-function setText(id, value) {
-    const el = document.getElementById(id);
-    if (el) el.textContent = value;
-}
+document.addEventListener("DOMContentLoaded", () => {
 
-// =========================
-// ESTADO INICIAL
-// =========================
-let hasData = false;
+    function setText(id, value) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value;
+    }
 
-// =========================
-// GASOLINA (FALLBACK SEGURO)
-// =========================
-const mejorPrecio = "⚠️ Sin datos disponibles";
-setText('barata', mejorPrecio);
+    // =========================
+    // ESTADO SISTEMA
+    // =========================
+    let status = "🟢 Sistema cargado correctamente";
 
-// =========================
-// ENERGÍA (FALLBACK REALISTA)
-// =========================
-const precioLuz = 0.135;
-const estadoLuz = "🟡 Media";
-const recomendacionLuz = "⚖️ Normal";
+    // =========================
+    // GASOLINA (FALLBACK SEGURO)
+    // =========================
+    setText('barata', "⚠️ Cargando datos...");
 
-setText('luz', `${precioLuz} €/kWh (${estadoLuz}) ${recomendacionLuz}`);
-setText('gas', "0.042 €/kWh");
+    // =========================
+    // ENERGÍA (FALLBACK REAL)
+    // =========================
+    setText('luz', "0.135 €/kWh (🟡 Media) ⚖️ Normal");
+    setText('gas', "0.042 €/kWh");
 
-// =========================
-// TOP 3 (VISIBLE, NO CONSOLE)
-// =========================
-const top3 = "No hay datos disponibles";
+    // =========================
+    // TOP 3 (VISIBLE)
+    // =========================
+    setText('top3', "⛽ No hay datos disponibles");
 
-const top3El = document.getElementById('top3');
-if (top3El) {
-    top3El.textContent = top3;
-}
+    // =========================
+    // SISTEMA INFO
+    // =========================
+    setText('status', status);
 
-// =========================
-// STATUS SISTEMA
-// =========================
-const statusEl = document.getElementById('status');
-if (statusEl) {
-    statusEl.textContent = "🟡 Modo fallback activo (datos simulados)";
-    statusEl.className = "status warn";
-}
+    const update = document.getElementById('update');
+    if (update) update.textContent = "🕒 Última actualización: " + new Date().toLocaleString();
 
-// =========================
-// TIMESTAMP + CACHE BUSTING
-// =========================
-const ts = Date.now();
+    const total = document.getElementById('total');
+    if (total) total.textContent = "⛽ Estaciones analizadas: --";
 
-const csv = document.getElementById('csvlink');
-if (csv) csv.href = `precios_gasolina_2026-04-03.csv?v=${ts}`;
+    // =========================
+    // CACHE BUSTING
+    // =========================
+    const ts = Date.now();
 
-const img1 = document.getElementById('img_gasolina');
-if (img1) img1.src = `historial_gasolina.png?v=${ts}`;
+    const csv = document.getElementById('csvlink');
+    if (csv) csv.href = "precios_gasolina_2026-04-03.csv?v=" + ts;
 
-const img2 = document.getElementById('img_energia');
-if (img2) img2.src = `historial_energia.png?v=${ts}`;
+    const img1 = document.getElementById('img_gasolina');
+    if (img1) img1.src = "historial_gasolina.png?v=" + ts;
+
+    const img2 = document.getElementById('img_energia');
+    if (img2) img2.src = "historial_energia.png?v=" + ts;
+
+});
