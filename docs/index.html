@@ -107,62 +107,61 @@
     <a id="csvlink" href="#">Descargar CSV</a>
 </div>
 
-<!-- JS -->
-<script src="js/script.js?v=1"></script>
+<!-- CONTROL DE CARGA DEL SCRIPT -->
+<script>
+window.__SCRIPT_OK = false;
+</script>
 
-<!-- =========================
-     FALLBACK GLOBAL REAL
-========================= -->
+<script src="js/script.js?v=1"
+        onload="window.__SCRIPT_OK = true"
+        onerror="window.__SCRIPT_OK = false"></script>
+
+<!-- FALLBACK INTELIGENTE -->
 <script>
 (function () {
 
-    let loaded = false;
+    const status = document.getElementById('status');
 
-    window.addEventListener("load", () => {
-        setTimeout(() => {
+    function setStatus(text, cls) {
+        if (!status) return;
+        status.textContent = text;
+        status.className = "status " + cls;
+    }
 
-            const barata = document.getElementById('barata')?.textContent;
-            const status = document.getElementById('status');
-            const total = document.getElementById('total');
+    setTimeout(() => {
 
-            // JS nunca actualizó
-            if (!barata || barata === "Cargando...") {
-                document.getElementById('barata').textContent = "⚠️ Sin datos del sistema";
+        const barata = document.getElementById('barata')?.textContent;
 
-                status.textContent = "🔴 Error: backend o script no ejecutado";
-                status.className = "status bad";
+        // SCRIPT NO EJECUTÓ
+        if (!window.__SCRIPT_OK || !barata || barata === "Cargando...") {
 
-                total.textContent = "⛽ Estaciones analizadas: 0";
-                return;
-            }
+            setStatus("🔴 Sistema caído (script.js no ejecutado)", "bad");
 
-            // Datos parciales
-            if (barata.includes("⚠️")) {
-                status.textContent = "🟡 Datos incompletos";
-                status.className = "status warn";
-            } else {
-                status.textContent = "🟢 Sistema OK";
-                status.className = "status ok";
-            }
+            document.getElementById('barata').textContent = "⚠️ Sin datos disponibles";
+            document.getElementById('luz').textContent = "No disponible";
+            document.getElementById('gas').textContent = "No disponible";
+            document.getElementById('top3').textContent = "Sin datos disponibles";
 
-        }, 5000);
-    });
-
-    // ERROR REAL DE JS
-    window.addEventListener("error", function () {
-        const status = document.getElementById('status');
-        if (status) {
-            status.textContent = "🔴 Error crítico en script.js";
-            status.className = "status bad";
+            return;
         }
+
+        // DATOS PARCIALES
+        if (barata.includes("⚠️") || barata.includes("Sin datos")) {
+            setStatus("🟡 Datos incompletos", "warn");
+        } else {
+            setStatus("🟢 Sistema OK", "ok");
+        }
+
+    }, 1500);
+
+    window.addEventListener("error", () => {
+        setStatus("🔴 Error crítico en JS", "bad");
     });
 
 })();
 </script>
 
-<!-- =========================
-     CONTROL DE IMÁGENES
-========================= -->
+<!-- CONTROL IMÁGENES -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
 

@@ -46,20 +46,32 @@ jobs:
           python main.py
 
       # =========================
-      # 5. VALIDACIÓN DE OUTPUTS (CLAVE)
+      # 5. VALIDACIÓN REAL DE OUTPUT
       # =========================
-      - name: Validar archivos generados
+      - name: Validar outputs críticos
         run: |
-          echo "📂 Verificando outputs..."
+          echo "📂 Validando archivos generados..."
 
-          test -f js/script.js || (echo "❌ Falta script.js" && exit 1)
-          test -f historial_gasolina.png || echo "⚠️ Falta histórico gasolina"
-          test -f historial_energia.png || echo "⚠️ Falta histórico energía"
+          # JS obligatorio
+          if [ ! -s js/script.js ]; then
+            echo "❌ script.js vacío o no existe"
+            exit 1
+          fi
 
-          echo "✅ Validación completada"
+          # Validación mínima de contenido JS (anti basura)
+          if ! grep -q "setText" js/script.js && ! grep -q "document.getElementById" js/script.js; then
+            echo "❌ script.js inválido (sin lógica)"
+            exit 1
+          fi
+
+          echo "✅ JS válido"
+
+          # imágenes opcionales
+          [ -f historial_gasolina.png ] || echo "⚠️ Falta historial gasolina"
+          [ -f historial_energia.png ] || echo "⚠️ Falta historial energía"
 
       # =========================
-      # 6. FORZAR TIMESTAMP
+      # 6. TIMESTAMP
       # =========================
       - name: Forzar actualización
         run: |
@@ -67,7 +79,7 @@ jobs:
           date > docs/last_update.txt
 
       # =========================
-      # 7. COMMIT INTELIGENTE (MEJORADO)
+      # 7. COMMIT INTELIGENTE REAL
       # =========================
       - name: Commit y push cambios
         run: |
@@ -79,12 +91,12 @@ jobs:
           echo "📂 Estado del repo:"
           git status
 
-          # SOLO ARCHIVOS REALES DEL SISTEMA
+          # SOLO LO IMPORTANTE
           git add js/script.js docs/ historial_*.png gasolina.db main.py || true
 
-          # Detectar cambios reales
+          # evitar commits basura
           if git diff --cached --quiet; then
-            echo "⚠️ Sin cambios reales → skip commit"
+            echo "⚠️ Sin cambios reales"
             exit 0
           fi
 
@@ -92,11 +104,11 @@ jobs:
           git push
 
       # =========================
-      # 8. DEBUG FINAL
+      # 8. DIAGNÓSTICO FINAL
       # =========================
       - name: Estado final
         run: |
           echo "=================================="
-          echo "✅ WORKFLOW FINALIZADO"
+          echo "✅ WORKFLOW OK"
           echo "=================================="
           git log -1 --oneline || true
