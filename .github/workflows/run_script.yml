@@ -2,7 +2,7 @@ name: Actualizar precios gasolina + energía
 
 on:
   schedule:
-    - cron: "0 * * * *"  # cada hora
+    - cron: "0 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -37,15 +37,29 @@ jobs:
           pip install matplotlib pandas requests
 
       # =========================
-      # 4. EJECUCIÓN MAIN (ROBUSTA)
+      # 4. EJECUCIÓN MAIN (FAIL FAST)
       # =========================
       - name: Ejecutar main.py
         run: |
+          set -e
           echo "🚀 Ejecutando script..."
-          python main.py || echo "⚠️ Error en main.py pero continuamos"
+          python main.py
 
       # =========================
-      # 5. FORZAR TIMESTAMP
+      # 5. VALIDACIÓN DE OUTPUTS (CLAVE)
+      # =========================
+      - name: Validar archivos generados
+        run: |
+          echo "📂 Verificando outputs..."
+
+          test -f js/script.js || (echo "❌ Falta script.js" && exit 1)
+          test -f historial_gasolina.png || echo "⚠️ Falta histórico gasolina"
+          test -f historial_energia.png || echo "⚠️ Falta histórico energía"
+
+          echo "✅ Validación completada"
+
+      # =========================
+      # 6. FORZAR TIMESTAMP
       # =========================
       - name: Forzar actualización
         run: |
@@ -53,32 +67,32 @@ jobs:
           date > docs/last_update.txt
 
       # =========================
-      # 6. COMMIT INTELIGENTE
+      # 7. COMMIT INTELIGENTE (MEJORADO)
       # =========================
       - name: Commit y push cambios
         run: |
+          set -e
+
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
           echo "📂 Estado del repo:"
           git status
 
-          # Añadir solo lo relevante
-          git add docs/ gasolina.db historial_*.png main.py script.js || true
+          # SOLO ARCHIVOS REALES DEL SISTEMA
+          git add js/script.js docs/ historial_*.png gasolina.db main.py || true
 
           # Detectar cambios reales
           if git diff --cached --quiet; then
-            echo "⚠️ Sin cambios reales → commit vacío controlado"
-            git commit --allow-empty -m "🔄 Keep alive $(date '+%Y-%m-%d %H:%M')"
-          else
-            echo "✅ Cambios detectados → commit normal"
-            git commit -m "🚀 Update gasolina + energía $(date '+%Y-%m-%d %H:%M')"
+            echo "⚠️ Sin cambios reales → skip commit"
+            exit 0
           fi
 
-          git push || echo "⚠️ Push falló (posible conflicto remoto)"
+          git commit -m "🚀 Update gasolina + energía $(date '+%Y-%m-%d %H:%M')"
+          git push
 
       # =========================
-      # 7. DEBUG FINAL
+      # 8. DEBUG FINAL
       # =========================
       - name: Estado final
         run: |

@@ -1,20 +1,44 @@
 import json
+import os
+import pandas as pd
+import math
 
 # =========================
-# INTELIGENCIA SEGURA
+# SEGURIDAD BASE
 # =========================
+precios = globals().get('precios', [])
+df_hoy = globals().get('df_hoy', pd.DataFrame())
 
-sin_datos = len(precios) == 0
+precio_luz = globals().get('precio_luz', None)
+precio_gas = globals().get('precio_gas', 0.042)
+fecha_hora = globals().get('fecha_hora', "N/A")
 
-# -------------------------
-# MEJOR PRECIO (SAFE)
-# -------------------------
-if not sin_datos and len(df_hoy) > 0:
-    min_row = df_hoy.loc[df_hoy['precio'].idxmin()]
-    mejor_precio_txt = f"💰 {min_row['estacion']} - {min_row['precio']}€"
-    if min_row["precio"] < 1.75:
+CSV_PATH = globals().get('CSV_PATH', 'datos.csv')
+JS_DIR = globals().get('JS_DIR', 'js')
+
+sin_datos = precios is None or len(precios) == 0
+
+# =========================
+# LIMPIEZA DF
+# =========================
+if not df_hoy.empty and 'precio' in df_hoy.columns:
+    df_hoy['precio'] = pd.to_numeric(df_hoy['precio'], errors='coerce')
+    df_hoy_clean = df_hoy.dropna(subset=['precio'])
+else:
+    df_hoy_clean = pd.DataFrame()
+
+# =========================
+# MEJOR PRECIO
+# =========================
+if not sin_datos and not df_hoy_clean.empty:
+    min_row = df_hoy_clean.loc[df_hoy_clean['precio'].idxmin()]
+    mejor_precio_txt = f"💰 {min_row.get('estacion','?')} - {min_row.get('precio','?')}€"
+
+    precio_min = float(min_row.get("precio", 999))
+
+    if precio_min < 1.75:
         alerta = "🚨 MUY BARATA"
-    elif min_row["precio"] < 1.80:
+    elif precio_min < 1.80:
         alerta = "⚠️ Buen precio"
     else:
         alerta = ""
@@ -23,10 +47,10 @@ else:
     mejor_precio_txt = "⚠️ Sin datos disponibles"
     alerta = ""
 
-# -------------------------
-# LUZ (SAFE)
-# -------------------------
-if precio_luz is not None:
+# =========================
+# LUZ
+# =========================
+if isinstance(precio_luz, (int, float)) and not math.isnan(precio_luz):
     if precio_luz < 0.08:
         estado_luz = "🟢 Barata"
         recomendacion = "💡 Aprovecha"
@@ -36,65 +60,78 @@ if precio_luz is not None:
     else:
         estado_luz = "🔴 Cara"
         recomendacion = "🚫 Evita consumo"
-    precio_luz_txt = f"{precio_luz} €/kWh"
+
+    precio_luz_txt = f"{precio_luz:.3f} €/kWh"
 else:
     estado_luz = "Sin datos"
     recomendacion = ""
     precio_luz_txt = "No disponible"
 
-# -------------------------
-# TOP 3 (SAFE)
-# -------------------------
-if not sin_datos and len(df_hoy) > 0:
-    top3 = df_hoy.nsmallest(3, 'precio')
-    top3_texto = "\\n".join([
-        f"{i+1}. {r['estacion']} - {r['precio']}€"
+# =========================
+# TOP 3
+# =========================
+if not sin_datos and not df_hoy_clean.empty:
+    top3 = df_hoy_clean.nsmallest(3, 'precio')
+
+    top3_texto = "\n".join([
+        f"{i+1}. {r.get('estacion','?')} - {r.get('precio','?')}€"
         for i, (_, r) in enumerate(top3.iterrows())
     ])
 else:
     top3_texto = "Sin datos disponibles"
 
 # =========================
-# SANITIZAR PARA JS (CLAVE)
+# SAFE JS
 # =========================
 def safe_js(text):
-    return json.dumps(text, ensure_ascii=False)
+    return json.dumps(str(text), ensure_ascii=False)
 
 # =========================
-# JS FINAL PRO
+# JS FINAL
 # =========================
+total_estaciones = len(precios) if not sin_datos else 0
+
 js_code = f"""
-// MEJOR PRECIO
 document.getElementById('barata').textContent = {safe_js(mejor_precio_txt + (" " + alerta if alerta else ""))};
 
-// ENERGÍA
-document.getElementById('luz').textContent = {safe_js(f"{precio_luz_txt} ({estado_luz}) {recomendacion}")};
-document.getElementById('gas').textContent = {safe_js(f"{precio_gas} €/kWh")};
+document.getElementById('luz').textContent =
+{safe_js(f"{precio_luz_txt} ({estado_luz}) {recomendacion}")};
 
-// INFO SISTEMA
-document.getElementById('update').textContent = {safe_js(f"🕒 Última actualización: {fecha_hora}")};
-document.getElementById('total').textContent = {safe_js(f"⛽ Estaciones analizadas: {len(precios)}")};
+document.getElementById('gas').textContent =
+{safe_js(f"{float(precio_gas):.3f} €/kWh")};
 
-// TOP 3
-document.getElementById('top3').textContent = {safe_js(top3_texto)};
+document.getElementById('update').textContent =
+{safe_js(f"🕒 Última actualización: {fecha_hora}")};
 
-// CACHE BUSTING
+document.getElementById('total').textContent =
+{safe_js(f"⛽ Estaciones analizadas: {total_estaciones}")};
+
+document.getElementById('top3').textContent =
+{safe_js(top3_texto)};
+
 const ts = Date.now();
-document.getElementById('csvlink').href = "{os.path.basename(CSV_PATH)}?v=" + ts;
-document.getElementById('img_gasolina').src = "historial_gasolina.png?v=" + ts;
-document.getElementById('img_energia').src = "historial_energia.png?v=" + ts;
+document.getElementById('csvlink').href =
+"{os.path.basename(CSV_PATH)}?v=" + ts;
+
+document.getElementById('img_gasolina').src =
+"historial_gasolina.png?v=" + ts;
+
+document.getElementById('img_energia').src =
+"historial_energia.png?v=" + ts;
 """
 
 # =========================
-# ESCRIBIR JS
+# ESCRITURA
 # =========================
+os.makedirs(JS_DIR, exist_ok=True)
+
 with open(os.path.join(JS_DIR, "script.js"), "w", encoding="utf-8") as f:
     f.write(js_code)
 
 # =========================
-# LOGS PRO
+# LOGS
 # =========================
-print("🔥 SISTEMA PRO ACTIVO")
-print(f"📊 Registros hoy: {len(df_hoy) if 'df_hoy' in globals() else 0}")
-print(f"⛽ Precio mínimo: {min_row['precio'] if min_row is not None else 'N/A'}")
-print(f"⚡ Precio luz: {precio_luz}")
+print("🔥 SISTEMA PRO ULTRA ESTABLE ACTIVO")
+print(f"📊 Registros: {total_estaciones}")
+print(f"⛽ Min precio: {min_row['precio'] if min_row is not None else 'N/A'}")
+print(f"⚡ Luz: {precio_luz}")
