@@ -2,8 +2,7 @@ name: Actualizar precios gasolina + energía
 
 on:
   schedule:
-    # ⛽ Gasolina cada hora
-    - cron: "0 * * * *"
+    - cron: "0 * * * *"  # cada hora
   workflow_dispatch:
 
 permissions:
@@ -34,21 +33,27 @@ jobs:
       - name: Ejecutar main.py
         run: python main.py
 
-      # 5. Commit y push
+      # 5. Commit y push (CON PERSISTENCIA REAL)
       - name: Commit y push cambios
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
-          # 🔥 IMPORTANTE: añadir TODO lo que cambia
-          git add docs/
+          # 🔥 AÑADIR TODO (incluye DB, imágenes, js, csv)
+          git add docs/ gasolina.db || true
 
-          # Debug por si vuelve a fallar
-          echo "Archivos modificados:"
+          echo "📂 Archivos modificados:"
           git status
 
+          # Evitar fallo si no hay cambios
           if git diff --cached --quiet; then
-            echo "No hay cambios"
+            echo "⚠️ No hay cambios para commit"
           else
-            git commit -m "🚀 Update gasolina + energía + dashboard ($(date '+%Y-%m-%d %H:%M'))"
+            git commit -m "🚀 Update gasolina + energía ($(date '+%Y-%m-%d %H:%M'))"
             git push
+          fi
+
+      # 6. KEEP-ALIVE (evita que GitHub duerma el cron)
+      - name: Keep alive
+        run: |
+          echo "⏰ Manteniendo workflow activo"
