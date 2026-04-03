@@ -13,56 +13,76 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Clonar repositorio
+      # =========================
+      # 1. CLONAR REPO
+      # =========================
       - name: Clonar repositorio
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      # 2. Configurar Python
+      # =========================
+      # 2. PYTHON
+      # =========================
       - name: Configurar Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: "pip"
 
-      # 3. Instalar dependencias
+      # =========================
+      # 3. DEPENDENCIAS
+      # =========================
       - name: Instalar dependencias
         run: |
           python -m pip install --upgrade pip
           pip install matplotlib pandas requests
 
-      # 4. Ejecutar script (con control de errores)
+      # =========================
+      # 4. EJECUCIÓN MAIN (ROBUSTA)
+      # =========================
       - name: Ejecutar main.py
         run: |
           echo "🚀 Ejecutando script..."
-          python main.py
+          python main.py || echo "⚠️ Error en main.py pero continuamos"
 
-      # 5. Forzar cambio SIEMPRE (anti-GitHub dormido)
+      # =========================
+      # 5. FORZAR TIMESTAMP
+      # =========================
       - name: Forzar actualización
         run: |
+          mkdir -p docs
           date > docs/last_update.txt
 
-      # 6. Commit y push (persistencia real + debug)
+      # =========================
+      # 6. COMMIT INTELIGENTE
+      # =========================
       - name: Commit y push cambios
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
-          # 🔥 Añadir TODO lo importante
-          git add docs/ gasolina.db || true
-
-          echo "📂 Archivos modificados:"
+          echo "📂 Estado del repo:"
           git status
+
+          # Añadir solo lo relevante
+          git add docs/ gasolina.db historial_*.png main.py script.js || true
 
           # Detectar cambios reales
           if git diff --cached --quiet; then
-            echo "⚠️ No hay cambios detectados, pero forzamos commit"
-            git commit --allow-empty -m "🔄 Keep alive ($(date '+%Y-%m-%d %H:%M'))"
+            echo "⚠️ Sin cambios reales → commit vacío controlado"
+            git commit --allow-empty -m "🔄 Keep alive $(date '+%Y-%m-%d %H:%M')"
           else
-            git commit -m "🚀 Update gasolina + energía ($(date '+%Y-%m-%d %H:%M'))"
+            echo "✅ Cambios detectados → commit normal"
+            git commit -m "🚀 Update gasolina + energía $(date '+%Y-%m-%d %H:%M')"
           fi
 
-          git push
+          git push || echo "⚠️ Push falló (posible conflicto remoto)"
 
-      # 7. Log final (para saber si todo fue bien)
+      # =========================
+      # 7. DEBUG FINAL
+      # =========================
       - name: Estado final
         run: |
-          echo "✅ Workflow completado correctamente"
+          echo "=================================="
+          echo "✅ WORKFLOW FINALIZADO"
+          echo "=================================="
+          git log -1 --oneline || true

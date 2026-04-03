@@ -13,9 +13,7 @@
             background: #fafafa;
         }
 
-        h1 {
-            text-align: center;
-        }
+        h1 { text-align: center; }
 
         .card {
             background: #ffffff;
@@ -36,7 +34,6 @@
         .meta {
             font-size: 13px;
             color: #666;
-            margin-top: 5px;
         }
 
         .highlight {
@@ -47,6 +44,7 @@
         .status {
             font-size: 14px;
             margin-top: 5px;
+            font-weight: bold;
         }
 
         .ok { color: green; }
@@ -54,60 +52,69 @@
         .bad { color: red; }
     </style>
 </head>
+
 <body>
 
-    <h1>⛽ Gasolina + ⚡ Energía (Seseña)</h1>
+<h1>⛽ Gasolina + ⚡ Energía (Seseña)</h1>
 
-    <!-- INFO SISTEMA -->
-    <div class="card">
-        <p id="update" class="meta">🕒 Última actualización: cargando...</p>
-        <p id="total" class="meta">⛽ Estaciones analizadas: ...</p>
-        <p id="status" class="status">Estado: cargando...</p>
-    </div>
+<!-- SISTEMA -->
+<div class="card">
+    <p id="update" class="meta">🕒 Última actualización: cargando...</p>
+    <p id="total" class="meta">⛽ Estaciones analizadas: ...</p>
+    <p id="status" class="status">🔄 Inicializando sistema...</p>
+</div>
 
-    <div class="card">
-        <h2>💰 Mejor precio hoy</h2>
-        <p id="barata" class="highlight">Cargando...</p>
-    </div>
+<!-- MEJOR PRECIO -->
+<div class="card">
+    <h2>💰 Mejor precio hoy</h2>
+    <p id="barata" class="highlight">Cargando...</p>
+</div>
 
-    <div class="card">
-        <h2>🏆 Top 3 gasolineras</h2>
-        <pre id="top3" class="top3">Cargando...</pre>
-    </div>
+<!-- TOP 3 -->
+<div class="card">
+    <h2>🏆 Top 3 gasolineras</h2>
+    <pre id="top3" class="top3">Cargando...</pre>
+</div>
 
-    <div class="card">
-        <h2>⚡ Energía hoy</h2>
-        <p>⚡ Luz: <span id="luz">Cargando...</span></p>
-        <p>🔥 Gas: <span id="gas">Cargando...</span></p>
-    </div>
+<!-- ENERGÍA -->
+<div class="card">
+    <h2>⚡ Energía hoy</h2>
+    <p>⚡ Luz: <span id="luz">Cargando...</span></p>
+    <p>🔥 Gas: <span id="gas">Cargando...</span></p>
+</div>
 
-    <div class="card">
-        <h2>📊 Histórico gasolina</h2>
-        <img id="img_gasolina" src="historial_gasolina.png" width="100%">
-    </div>
+<!-- HISTÓRICO -->
+<div class="card">
+    <h2>📊 Histórico gasolina</h2>
+    <img id="img_gasolina" width="100%">
+</div>
 
-    <div class="card">
-        <h2>⚡ Histórico energía</h2>
-        <img id="img_energia" src="historial_energia.png" width="100%">
-    </div>
+<div class="card">
+    <h2>⚡ Histórico energía</h2>
+    <img id="img_energia" width="100%">
+</div>
 
-    <div class="card">
-        <h2>📥 Descargar datos</h2>
-        <a id="csvlink" href="#">Descargar CSV</a>
-    </div>
+<!-- DESCARGA -->
+<div class="card">
+    <h2>📥 Descargar datos</h2>
+    <a id="csvlink" href="#">Descargar CSV</a>
+</div>
 
-    <!-- JS dinámico -->
-    <script src="js/script.js"></script>
+<!-- JS -->
+<script src="js/script.js"></script>
 
-    <!-- FALLBACK SI JS FALLA -->
-    <script>
-        setTimeout(() => {
-            if (document.getElementById('barata').textContent === "Cargando...") {
-                document.getElementById('barata').textContent = "⚠️ No se pudieron cargar datos";
-                document.getElementById('status').textContent = "🔴 Error de carga";
-            }
-        }, 5000);
-    </script>
+<!-- FALLBACK INTELIGENTE -->
+<script>
+setTimeout(() => {
+    const barata = document.getElementById('barata').textContent;
+
+    if (!barata || barata === "Cargando...") {
+        document.getElementById('barata').textContent = "⚠️ No hay datos disponibles";
+        document.getElementById('status').textContent = "🔴 Error o backend sin datos";
+        document.getElementById('status').className = "status bad";
+    }
+}, 5000);
+</script>
 
 </body>
 </html>
