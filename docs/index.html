@@ -30,6 +30,7 @@
             padding: 10px;
             border-radius: 8px;
             font-size: 14px;
+            white-space: pre-wrap;
         }
 
         .meta {
@@ -42,6 +43,15 @@
             font-size: 18px;
             font-weight: bold;
         }
+
+        .status {
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .ok { color: green; }
+        .warn { color: orange; }
+        .bad { color: red; }
     </style>
 </head>
 <body>
@@ -52,6 +62,7 @@
     <div class="card">
         <p id="update" class="meta">🕒 Última actualización: cargando...</p>
         <p id="total" class="meta">⛽ Estaciones analizadas: ...</p>
+        <p id="status" class="status">Estado: cargando...</p>
     </div>
 
     <div class="card">
@@ -93,6 +104,7 @@
         setTimeout(() => {
             if (document.getElementById('barata').textContent === "Cargando...") {
                 document.getElementById('barata').textContent = "⚠️ No se pudieron cargar datos";
+                document.getElementById('status').textContent = "🔴 Error de carga";
             }
         }, 5000);
     </script>
