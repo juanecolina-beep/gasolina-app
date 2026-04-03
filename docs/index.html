@@ -10,6 +10,7 @@
             max-width: 900px;
             margin: auto;
             padding: 20px;
+            background: #fafafa;
         }
 
         h1 {
@@ -17,16 +18,29 @@
         }
 
         .card {
-            background: #f5f5f5;
+            background: #ffffff;
             padding: 15px;
             border-radius: 10px;
             margin-bottom: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
         }
 
         .top3 {
             background: #eef6ff;
             padding: 10px;
             border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .meta {
+            font-size: 13px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .highlight {
+            font-size: 18px;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -34,9 +48,15 @@
 
     <h1>⛽ Gasolina + ⚡ Energía (Seseña)</h1>
 
+    <!-- INFO SISTEMA -->
+    <div class="card">
+        <p id="update" class="meta">🕒 Última actualización: cargando...</p>
+        <p id="total" class="meta">⛽ Estaciones analizadas: ...</p>
+    </div>
+
     <div class="card">
         <h2>💰 Mejor precio hoy</h2>
-        <p id="barata">Cargando...</p>
+        <p id="barata" class="highlight">Cargando...</p>
     </div>
 
     <div class="card">
@@ -67,6 +87,15 @@
 
     <!-- JS dinámico -->
     <script src="js/script.js"></script>
+
+    <!-- FALLBACK SI JS FALLA -->
+    <script>
+        setTimeout(() => {
+            if (document.getElementById('barata').textContent === "Cargando...") {
+                document.getElementById('barata').textContent = "⚠️ No se pudieron cargar datos";
+            }
+        }, 5000);
+    </script>
 
 </body>
 </html>

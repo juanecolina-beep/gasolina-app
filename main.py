@@ -18,6 +18,7 @@ os.makedirs(DOCS, exist_ok=True)
 os.makedirs(JS_DIR, exist_ok=True)
 
 fecha_hoy = datetime.now().strftime("%Y-%m-%d")
+fecha_hora = datetime.now().strftime("%Y-%m-%d %H:%M")
 CSV_PATH = os.path.join(DOCS, f"precios_gasolina_{fecha_hoy}.csv")
 
 # =========================
@@ -34,12 +35,20 @@ def obtener_precio_luz():
         r = requests.get(url, params=params, timeout=20)
         r.raise_for_status()
         data = r.json()
-        valores = data.get("included", [])[0].get("attributes", {}).get("values", [])
+
+        included = data.get("included", [])
+        if not included:
+            return None
+
+        valores = included[0].get("attributes", {}).get("values", [])
         precios = [v.get("value") for v in valores if v.get("value") is not None]
+
         if precios:
             return round(sum(precios)/len(precios)/1000, 3)
+
     except Exception as e:
         print("⚠️ Error luz:", e)
+
     return None
 
 def obtener_precio_gas():
@@ -55,7 +64,8 @@ def obtener_api(max_intentos=5, delay=10):
             r = requests.get(URL, headers=headers, timeout=20)
             r.raise_for_status()
             return r.json()
-        except:
+        except Exception as e:
+            print(f"⚠️ Intento {i+1} fallido:", e)
             if i < max_intentos-1:
                 time.sleep(delay)
     return None
@@ -66,25 +76,34 @@ def obtener_api(max_intentos=5, delay=10):
 data = obtener_api()
 precios = []
 
-if data:
-    for e in data.get("ListaEESSPrecio", []):
-        if MARCA in e.get("Rótulo","").upper() and MUNICIPIO in e.get("Municipio","").upper():
-            precio = e.get(TIPO)
-            if precio and precio.strip():
-                try:
-                    precios.append({
-                        "fecha": fecha_hoy,
-                        "estacion": e.get("Rótulo"),
-                        "direccion": e.get("Dirección"),
-                        "precio": float(precio.replace(",","."))
-                    })
-                except:
-                    pass
+if not data:
+    print("❌ API gasolina no responde. Abortando.")
+    exit()
 
-df_hoy = pd.DataFrame(precios) if precios else pd.DataFrame([{
-    "fecha": fecha_hoy,"estacion":"No hay datos","direccion":"No hay datos","precio":0
-}])
+total_estaciones = len(data.get("ListaEESSPrecio", []))
 
+for e in data.get("ListaEESSPrecio", []):
+    if MARCA in e.get("Rótulo","").upper() and MUNICIPIO in e.get("Municipio","").upper():
+        precio = e.get(TIPO)
+        if precio and precio.strip():
+            try:
+                precios.append({
+                    "fecha": fecha_hoy,
+                    "estacion": e.get("Rótulo"),
+                    "direccion": e.get("Dirección"),
+                    "precio": float(precio.replace(",","."))
+                })
+            except:
+                pass
+
+print(f"📊 Total estaciones API: {total_estaciones}")
+print(f"⛽ Filtradas ({MARCA}-{MUNICIPIO}): {len(precios)}")
+
+if not precios:
+    print("❌ No se encontraron precios válidos. Abortando update.")
+    exit()
+
+df_hoy = pd.DataFrame(precios)
 df_hoy.to_csv(CSV_PATH, index=False, sep=';')
 
 # =========================
@@ -108,7 +127,6 @@ cursor.execute("""CREATE TABLE IF NOT EXISTS energia (
 
 conn.commit()
 
-# Insert gasolina
 for p in precios:
     cursor.execute("SELECT 1 FROM precios_gasolina WHERE fecha=? AND estacion=? AND direccion=?",
                    (p["fecha"], p["estacion"], p["direccion"]))
@@ -116,7 +134,6 @@ for p in precios:
         cursor.execute("INSERT INTO precios_gasolina VALUES (NULL,?,?,?,?)",
                        (p["fecha"], p["estacion"], p["direccion"], p["precio"]))
 
-# Insert energía
 cursor.execute("SELECT 1 FROM energia WHERE fecha=?", (fecha_hoy,))
 if not cursor.fetchone():
     cursor.execute("INSERT INTO energia VALUES (NULL,?,?,?)",
@@ -126,10 +143,8 @@ conn.commit()
 conn.close()
 
 # =========================
-# GRÁFICOS PRO
+# GRÁFICOS
 # =========================
-
-# Gasolina histórico
 df_all = pd.read_sql_query("SELECT * FROM precios_gasolina", sqlite3.connect(DB))
 
 plt.figure(figsize=(8,5))
@@ -143,7 +158,6 @@ plt.legend()
 plt.tight_layout()
 plt.savefig(os.path.join(DOCS,"historial_gasolina.png"))
 
-# Energía histórico REAL
 df_energy = pd.read_sql_query("SELECT * FROM energia", sqlite3.connect(DB))
 
 plt.figure(figsize=(8,5))
@@ -159,17 +173,14 @@ plt.savefig(os.path.join(DOCS,"historial_energia.png"))
 # =========================
 # INTELIGENCIA
 # =========================
-
 min_row = df_hoy.loc[df_hoy['precio'].idxmin()]
 
-# ALERTA gasolina
 alerta = ""
 if min_row["precio"] < 1.75:
     alerta = "🚨 MUY BARATA"
 elif min_row["precio"] < 1.80:
     alerta = "⚠️ Buen precio"
 
-# Estado luz + recomendación
 if precio_luz is not None:
     if precio_luz < 0.08:
         estado_luz = "🟢 Barata"
@@ -184,7 +195,6 @@ else:
     estado_luz = "Sin datos"
     recomendacion = ""
 
-# TOP 3 gasolineras
 top3 = df_hoy.nsmallest(3, 'precio')
 top3_texto = "\\n".join([f"{r['estacion']} - {r['precio']}€" for _,r in top3.iterrows()])
 
@@ -195,6 +205,10 @@ js_code = f"""
 document.getElementById('barata').textContent = "💰 {min_row['estacion']} - {min_row['precio']}€ {alerta}";
 document.getElementById('luz').textContent = "{precio_luz} €/kWh ({estado_luz}) {recomendacion}";
 document.getElementById('gas').textContent = "{precio_gas} €/kWh";
+
+// NUEVO 👇
+document.getElementById('update').textContent = "🕒 Última actualización: {fecha_hora}";
+document.getElementById('total').textContent = "⛽ Estaciones analizadas: {len(precios)}";
 
 // TOP 3
 console.log("TOP 3 GASOLINERAS:\\n{top3_texto}");
@@ -209,3 +223,6 @@ with open(os.path.join(JS_DIR, "script.js"), "w", encoding="utf-8") as f:
     f.write(js_code)
 
 print("🔥 SISTEMA PRO ACTIVO")
+print(f"📊 Registros hoy: {len(df_hoy)}")
+print(f"⛽ Precio mínimo: {min_row['precio']}")
+print(f"⚡ Precio luz: {precio_luz}")
