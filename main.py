@@ -5,14 +5,14 @@ import math
 from datetime import datetime
 
 # =========================
-# CONFIG RUTAS (CLAVE)
+# CONFIG
 # =========================
 DOCS = "docs"
-JS_DIR = os.path.join(DOCS, "js")  # docs/js/script.js
+JS_DIR = os.path.join(DOCS, "js")
 os.makedirs(JS_DIR, exist_ok=True)
 
 # =========================
-# DEFAULT SAFE VALUES
+# INPUTS (CONTROLADOS)
 # =========================
 precios = globals().get('precios') or []
 df_hoy = globals().get('df_hoy')
@@ -23,16 +23,28 @@ fecha_hora = globals().get('fecha_hora') or datetime.now().strftime("%Y-%m-%d %H
 
 CSV_PATH = globals().get('CSV_PATH') or os.path.join(DOCS, 'datos.csv')
 
-sin_datos = (df_hoy is None or df_hoy.empty or len(precios) == 0)
+# =========================
+# DIAGNÓSTICO BASE
+# =========================
+errores = []
+
+if not precios:
+    errores.append("Sin datos gasolina")
+
+if df_hoy is None or df_hoy.empty:
+    errores.append("df_hoy vacío")
 
 # =========================
-# SAFE DF
+# LIMPIEZA DF
 # =========================
 if df_hoy is not None and not df_hoy.empty and 'precio' in df_hoy.columns:
     df_hoy['precio'] = pd.to_numeric(df_hoy['precio'], errors='coerce')
     df_hoy_clean = df_hoy.dropna(subset=['precio'])
 else:
     df_hoy_clean = pd.DataFrame()
+
+if df_hoy_clean.empty:
+    errores.append("Sin precios válidos")
 
 # =========================
 # MEJOR PRECIO
@@ -54,20 +66,25 @@ else:
     alerta = ""
 
 # =========================
-# LUZ SAFE
+# LUZ ROBUSTA
 # =========================
-if isinstance(precio_luz, (int, float)) and not math.isnan(precio_luz):
-    if precio_luz < 0.08:
-        estado_luz = "🟢 Barata"
-    elif precio_luz < 0.15:
-        estado_luz = "🟡 Media"
-    else:
-        estado_luz = "🔴 Cara"
+try:
+    if isinstance(precio_luz, (int, float)) and not math.isnan(precio_luz):
+        if precio_luz < 0.08:
+            estado_luz = "🟢 Barata"
+        elif precio_luz < 0.15:
+            estado_luz = "🟡 Media"
+        else:
+            estado_luz = "🔴 Cara"
 
-    precio_luz_txt = f"{precio_luz:.3f} €/kWh"
-else:
+        precio_luz_txt = f"{precio_luz:.3f} €/kWh"
+    else:
+        raise ValueError("Precio luz inválido")
+
+except:
     estado_luz = "Sin datos"
     precio_luz_txt = "No disponible"
+    errores.append("Error precio luz")
 
 # =========================
 # TOP 3
@@ -82,18 +99,26 @@ else:
     top3_texto = "Sin datos disponibles"
 
 # =========================
-# SAFE JS ESCAPE
+# ESTADO GLOBAL
+# =========================
+if errores:
+    estado_global = "🟡 " + " | ".join(errores)
+else:
+    estado_global = "🟢 OK"
+
+# =========================
+# SAFE JS
 # =========================
 def safe_js(text):
     return json.dumps(str(text), ensure_ascii=False)
 
 total_estaciones = len(df_hoy_clean)
 
-# =========================
-# JS FINAL (ROBUSTO + RUTAS CORRECTAS)
-# =========================
 csv_filename = os.path.basename(CSV_PATH)
 
+# =========================
+# JS FINAL PRO
+# =========================
 js_code = f"""
 function setText(id, value) {{
     const el = document.getElementById(id);
@@ -106,14 +131,13 @@ setText('gas', {safe_js(f"{precio_gas:.3f} €/kWh")});
 setText('update', {safe_js(f"🕒 {fecha_hora}")});
 setText('total', {safe_js(f"⛽ Estaciones: {total_estaciones}")});
 setText('top3', {safe_js(top3_texto)});
+setText('status', {safe_js(estado_global)});
 
 const ts = Date.now();
 
-// CSV dentro de /docs
 const csv = document.getElementById('csvlink');
 if (csv) csv.href = "{csv_filename}?v=" + ts;
 
-// Imágenes dentro de /docs
 const g = document.getElementById('img_gasolina');
 if (g) g.src = "historial_gasolina.png?v=" + ts;
 
@@ -122,14 +146,17 @@ if (e) e.src = "historial_energia.png?v=" + ts;
 """
 
 # =========================
-# ESCRITURA SEGURA
+# WRITE JS
 # =========================
 with open(os.path.join(JS_DIR, "script.js"), "w", encoding="utf-8") as f:
     f.write(js_code)
 
 # =========================
-# LOGS
+# LOGS REALES
 # =========================
-print("🔥 MAIN ESTABLE LISTO")
-print(f"📊 Registros: {total_estaciones}")
-print(f"📁 JS generado en: {os.path.join(JS_DIR, 'script.js')}")
+print("===================================")
+print("🔥 MAIN EJECUTADO")
+print("===================================")
+print(f"📊 Registros válidos: {total_estaciones}")
+print(f"⚠️ Errores: {errores if errores else 'Ninguno'}")
+print(f"📁 JS generado: {os.path.join(JS_DIR, 'script.js')}")
