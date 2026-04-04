@@ -5,6 +5,13 @@ import math
 from datetime import datetime
 
 # =========================
+# CONFIG RUTAS (CLAVE)
+# =========================
+DOCS = "docs"
+JS_DIR = os.path.join(DOCS, "js")  # docs/js/script.js
+os.makedirs(JS_DIR, exist_ok=True)
+
+# =========================
 # DEFAULT SAFE VALUES
 # =========================
 precios = globals().get('precios') or []
@@ -14,8 +21,7 @@ precio_luz = globals().get('precio_luz')
 precio_gas = globals().get('precio_gas') or 0.042
 fecha_hora = globals().get('fecha_hora') or datetime.now().strftime("%Y-%m-%d %H:%M")
 
-CSV_PATH = globals().get('CSV_PATH') or 'datos.csv'
-JS_DIR = globals().get('JS_DIR') or 'js'
+CSV_PATH = globals().get('CSV_PATH') or os.path.join(DOCS, 'datos.csv')
 
 sin_datos = (df_hoy is None or df_hoy.empty or len(precios) == 0)
 
@@ -84,8 +90,10 @@ def safe_js(text):
 total_estaciones = len(df_hoy_clean)
 
 # =========================
-# JS FINAL (ROBUSTO)
+# JS FINAL (ROBUSTO + RUTAS CORRECTAS)
 # =========================
+csv_filename = os.path.basename(CSV_PATH)
+
 js_code = f"""
 function setText(id, value) {{
     const el = document.getElementById(id);
@@ -101,9 +109,11 @@ setText('top3', {safe_js(top3_texto)});
 
 const ts = Date.now();
 
+// CSV dentro de /docs
 const csv = document.getElementById('csvlink');
-if (csv) csv.href = "{os.path.basename(CSV_PATH)}?v=" + ts;
+if (csv) csv.href = "{csv_filename}?v=" + ts;
 
+// Imágenes dentro de /docs
 const g = document.getElementById('img_gasolina');
 if (g) g.src = "historial_gasolina.png?v=" + ts;
 
@@ -111,10 +121,15 @@ const e = document.getElementById('img_energia');
 if (e) e.src = "historial_energia.png?v=" + ts;
 """
 
-os.makedirs(JS_DIR, exist_ok=True)
-
+# =========================
+# ESCRITURA SEGURA
+# =========================
 with open(os.path.join(JS_DIR, "script.js"), "w", encoding="utf-8") as f:
     f.write(js_code)
 
-print("✅ SCRIPT GENERADO CORRECTAMENTE")
+# =========================
+# LOGS
+# =========================
+print("🔥 MAIN ESTABLE LISTO")
 print(f"📊 Registros: {total_estaciones}")
+print(f"📁 JS generado en: {os.path.join(JS_DIR, 'script.js')}")
