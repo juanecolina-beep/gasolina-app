@@ -93,12 +93,12 @@
 <!-- HISTÓRICO -->
 <div class="card">
     <h2>📊 Histórico gasolina</h2>
-    <img id="img_gasolina" alt="Histórico gasolina" src="">
+    <img id="img_gasolina" alt="Histórico gasolina">
 </div>
 
 <div class="card">
     <h2>⚡ Histórico energía</h2>
-    <img id="img_energia" alt="Histórico energía" src="">
+    <img id="img_energia" alt="Histórico energía">
 </div>
 
 <!-- DESCARGA -->
@@ -107,16 +107,16 @@
     <a id="csvlink" href="#">Descargar CSV</a>
 </div>
 
-<!-- CONTROL DE CARGA DEL SCRIPT -->
+<!-- CONTROL SCRIPT -->
 <script>
 window.__SCRIPT_OK = false;
 </script>
 
-<script src="js/script.js?v=1"
+<script src="js/script.js"
         onload="window.__SCRIPT_OK = true"
         onerror="window.__SCRIPT_OK = false"></script>
 
-<!-- FALLBACK INTELIGENTE -->
+<!-- SISTEMA DE CONTROL REAL -->
 <script>
 (function () {
 
@@ -128,34 +128,53 @@ window.__SCRIPT_OK = false;
         status.className = "status " + cls;
     }
 
+    function safeSet(id, value) {
+        const el = document.getElementById(id);
+        if (el && (!el.textContent || el.textContent === "Cargando...")) {
+            el.textContent = value;
+        }
+    }
+
     setTimeout(() => {
 
         const barata = document.getElementById('barata')?.textContent;
 
-        // SCRIPT NO EJECUTÓ
-        if (!window.__SCRIPT_OK || !barata || barata === "Cargando...") {
+        // ❌ SCRIPT NO CARGÓ
+        if (!window.__SCRIPT_OK) {
+            setStatus("🔴 Script.js no cargado", "bad");
 
-            setStatus("🔴 Sistema caído (script.js no ejecutado)", "bad");
-
-            document.getElementById('barata').textContent = "⚠️ Sin datos disponibles";
-            document.getElementById('luz').textContent = "No disponible";
-            document.getElementById('gas').textContent = "No disponible";
-            document.getElementById('top3').textContent = "Sin datos disponibles";
+            safeSet('barata', "⚠️ Sin datos");
+            safeSet('luz', "No disponible");
+            safeSet('gas', "No disponible");
+            safeSet('top3', "Sin datos");
 
             return;
         }
 
-        // DATOS PARCIALES
+        // ❌ SCRIPT NO EJECUTÓ BIEN
+        if (!barata || barata === "Cargando...") {
+            setStatus("🔴 Backend sin datos o error JS", "bad");
+
+            safeSet('barata', "⚠️ Sin datos disponibles");
+            safeSet('luz', "No disponible");
+            safeSet('gas', "No disponible");
+            safeSet('top3', "Sin datos disponibles");
+
+            return;
+        }
+
+        // ⚠️ DATOS PARCIALES
         if (barata.includes("⚠️") || barata.includes("Sin datos")) {
             setStatus("🟡 Datos incompletos", "warn");
         } else {
             setStatus("🟢 Sistema OK", "ok");
         }
 
-    }, 1500);
+    }, 2000);
 
+    // ERROR GLOBAL JS
     window.addEventListener("error", () => {
-        setStatus("🔴 Error crítico en JS", "bad");
+        setStatus("🔴 Error crítico en JavaScript", "bad");
     });
 
 })();

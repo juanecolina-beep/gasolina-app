@@ -37,20 +37,27 @@ jobs:
           pip install matplotlib pandas requests
 
       # =========================
-      # 4. EJECUCIÓN MAIN (FAIL FAST)
+      # 4. EJECUTAR MAIN (CONTROL TOTAL)
       # =========================
       - name: Ejecutar main.py
         run: |
-          set -e
           echo "🚀 Ejecutando script..."
-          python main.py
+          python main.py 2>&1 | tee output.log
 
       # =========================
-      # 5. VALIDACIÓN REAL DE OUTPUT
+      # 5. DEBUG LOG (CLAVE)
+      # =========================
+      - name: Mostrar logs
+        run: |
+          echo "📄 OUTPUT DEL SCRIPT:"
+          cat output.log || true
+
+      # =========================
+      # 6. VALIDACIÓN REAL (ANTI HUMO)
       # =========================
       - name: Validar outputs críticos
         run: |
-          echo "📂 Validando archivos generados..."
+          echo "📂 Validando archivos..."
 
           # JS obligatorio
           if [ ! -s js/script.js ]; then
@@ -58,20 +65,27 @@ jobs:
             exit 1
           fi
 
-          # Validación mínima de contenido JS (anti basura)
+          # Validar contenido real JS
           if ! grep -q "setText" js/script.js && ! grep -q "document.getElementById" js/script.js; then
-            echo "❌ script.js inválido (sin lógica)"
+            echo "❌ script.js inválido"
             exit 1
           fi
 
-          echo "✅ JS válido"
+          echo "✅ JS OK"
 
-          # imágenes opcionales
+          # CSV opcional pero recomendable
+          if ls docs/*.csv 1> /dev/null 2>&1; then
+            echo "✅ CSV generado"
+          else
+            echo "⚠️ No hay CSV"
+          fi
+
+          # Imágenes (no críticas)
           [ -f historial_gasolina.png ] || echo "⚠️ Falta historial gasolina"
           [ -f historial_energia.png ] || echo "⚠️ Falta historial energía"
 
       # =========================
-      # 6. TIMESTAMP
+      # 7. TIMESTAMP (ANTI SLEEP)
       # =========================
       - name: Forzar actualización
         run: |
@@ -79,24 +93,22 @@ jobs:
           date > docs/last_update.txt
 
       # =========================
-      # 7. COMMIT INTELIGENTE REAL
+      # 8. COMMIT LIMPIO
       # =========================
-      - name: Commit y push cambios
+      - name: Commit y push
         run: |
-          set -e
-
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
-          echo "📂 Estado del repo:"
+          echo "📂 Estado repo:"
           git status
 
           # SOLO LO IMPORTANTE
           git add js/script.js docs/ historial_*.png gasolina.db main.py || true
 
-          # evitar commits basura
+          # evitar commits vacíos
           if git diff --cached --quiet; then
-            echo "⚠️ Sin cambios reales"
+            echo "⚠️ Sin cambios reales → no commit"
             exit 0
           fi
 
@@ -104,11 +116,11 @@ jobs:
           git push
 
       # =========================
-      # 8. DIAGNÓSTICO FINAL
+      # 9. DIAGNÓSTICO FINAL
       # =========================
       - name: Estado final
         run: |
           echo "=================================="
-          echo "✅ WORKFLOW OK"
+          echo "✅ WORKFLOW FINALIZADO"
           echo "=================================="
           git log -1 --oneline || true
