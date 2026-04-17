@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-17T17:21:58.643349",
+  "timestamp": "2026-04-17T17:27:51.387678",
   "status": "ok",
   "gasolina": {
     "mejor": {
@@ -27,7 +27,7 @@
       },
       {
         "posicion": 3,
-        "estacion": "Repsol Seseña",
+        "estacion": "Repsol Slover",
         "precio": 1.769
       }
     ]

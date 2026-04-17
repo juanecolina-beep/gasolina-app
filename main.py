@@ -35,7 +35,7 @@ def cargar_datos_gasolina():
     
     # Datos de ejemplo
     return pd.DataFrame({
-        'estacion': ['Gasolina Express', 'Shell Premium', 'Repsol Seseña', 'BP Energía', 'Cepsa Plus'],
+        'estacion': ['Gasolina Express', 'Shell Premium', 'Repsol Slover', 'BP Energía', 'Cepsa Plus'],
         'precio': [1.749, 1.789, 1.769, 1.799, 1.759],
     })
 
