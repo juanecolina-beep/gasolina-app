@@ -1,0 +1,47 @@
+{
+  "timestamp": "2026-04-17T17:45:21.637082",
+  "status": "ok",
+  "gasolina": {
+    "mejor": {
+      "estacion": "Gasolina Express",
+      "precio": 1.749,
+      "alerta": "🚨 MUY BARATA",
+      "estado": "ok"
+    },
+    "peor": {
+      "estacion": "BP Energía",
+      "precio": 1.799
+    },
+    "promedio": 1.773,
+    "total": 5,
+    "top3": [
+      {
+        "posicion": 1,
+        "estacion": "Gasolina Express",
+        "precio": 1.749
+      },
+      {
+        "posicion": 2,
+        "estacion": "Cepsa Plus",
+        "precio": 1.759
+      },
+      {
+        "posicion": 3,
+        "estacion": "Repsol Slover",
+        "precio": 1.769
+      }
+    ]
+  },
+  "energia": {
+    "luz": {
+      "precio": 0.135,
+      "unidad": "€/kWh",
+      "estado": "🟡 Media"
+    },
+    "gas": {
+      "precio": 0.042,
+      "unidad": "€/kWh",
+      "estado": "⚖️ Normal"
+    }
+  }
+}

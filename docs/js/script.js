@@ -30,6 +30,19 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.getElementById('status-text').textContent = ' ' + text;
     }
 
+    function formatPrice(value) {
+        return `${value.toFixed(3).replace('.', ',')}€`;
+    }
+
+    function formatMoney(value) {
+        return `${value.toFixed(2).replace('.', ',')}€`;
+    }
+
+    function formatarFecha(iso) {
+        const fecha = new Date(iso);
+        return fecha.toLocaleString('es-ES');
+    }
+
     // =========================
     // CARGAR DATOS DEL JSON
     // =========================
@@ -46,20 +59,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             const data = await response.json();
 
-            if (data.status !== 'ok' || !data.gasolina) {
+            if (data.status !== 'ok') {
                 throw new Error('Sin datos disponibles');
             }
 
-            // Procesar gasolina
+            // Procesar todos los módulos
+            procesarElectricidad(data.electricidad);
+            procesarGas(data.gas);
             procesarGasolina(data.gasolina);
-
-            // Procesar energía
-            if (data.energia) {
-                procesarEnergia(data.energia);
-            }
+            procesarPresupuesto(data.gasolina.presupuesto);
+            procesarRecomendaciones(data.recomendaciones);
+            procesarResumenFinanciero(data.resumen_financiero);
 
             // Actualizar metadata
-            setElement('timestamp', formatearFecha(data.timestamp));
+            setElement('timestamp', formatarFecha(data.timestamp));
             setElement('api-status', '✅ Conectado');
             setElement('data-status', '✅ Datos disponibles');
 
@@ -67,9 +80,123 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         } catch (error) {
             console.error('Error cargando datos:', error);
-            mostrarError(error.message);
             setStatus(`Error: ${error.message}`, 'error');
         }
+    }
+
+    // =========================
+    // PROCESAR ELECTRICIDAD
+    // =========================
+    
+    function procesarElectricidad(data) {
+        if (!data) return;
+
+        // Precios
+        setElement('elec-cheap', formatPrice(data.precio_minimo));
+        setElement('elec-avg', formatPrice(data.precio_promedio));
+        setElement('elec-expensive', formatPrice(data.precio_maximo));
+
+        // Mejor ventana
+        setElement('elec-best-hours', `${data.mejor_ventana.inicio} - ${data.mejor_ventana.fin}`);
+        setElement('elec-best-price', formatPrice(data.mejor_ventana.promedio));
+
+        // Costes
+        setElement('elec-daily-cost', formatMoney(data.coste_diario_estimado));
+        setElement('elec-monthly-cost', formatMoney(data.coste_mensual_estimado));
+
+        // Tabla horaria
+        generarTablaHoraria(data.horas);
+
+        // Gráfico
+        generarGraficoElectricidad(data.horas);
+    }
+
+    function generarTablaHoraria(horas) {
+        const container = document.getElementById('hourly-prices');
+        container.innerHTML = '';
+
+        horas.forEach((hora, idx) => {
+            const cell = document.createElement('div');
+            cell.className = `hour-cell ${hora.categoria}`;
+            cell.textContent = `${idx}:00\n${hora.precio.toFixed(3)}€`;
+            cell.title = `${hora.estado}`;
+            container.appendChild(cell);
+        });
+    }
+
+    function generarGraficoElectricidad(horas) {
+        const ctx = document.getElementById('hourly-chart');
+        if (!ctx) return;
+
+        const colores = horas.map(h => {
+            if (h.categoria === 'cheap') return 'rgba(16, 185, 129, 0.6)';
+            if (h.categoria === 'expensive') return 'rgba(239, 68, 68, 0.6)';
+            return 'rgba(245, 158, 11, 0.6)';
+        });
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: horas.map(h => h.hora),
+                datasets: [{
+                    label: 'Precio (€/kWh)',
+                    data: horas.map(h => h.precio),
+                    backgroundColor: colores,
+                    borderColor: colores,
+                    borderWidth: 2,
+                    borderRadius: 8,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return formatPrice(context.parsed.y);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return formatPrice(value);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // =========================
+    // PROCESAR GAS
+    // =========================
+    
+    function procesarGas(data) {
+        if (!data) return;
+
+        setElement('gas-price', formatPrice(data.precio_kwh));
+        setElement('gas-fixed', formatMoney(data.termino_fijo_diario));
+        setElement('gas-type', data.tarifa_type);
+
+        setElement('gas-daily', formatMoney(data.coste_diario_total));
+        setElement('gas-monthly', formatMoney(data.coste_mensual_total));
+
+        setElement('gas-daily-consumption', `${data.consumo_estimado_diario} kWh`);
+        setElement('gas-monthly-consumption', `${data.consumo_estimado_mensual} kWh`);
+
+        const alertEl = document.getElementById('gas-alert');
+        alertEl.textContent = data.alerta;
+        alertEl.className = 'badge ' + (data.alerta.includes('✅') ? 'ok' : 'warn');
     }
 
     // =========================
@@ -77,114 +204,128 @@ document.addEventListener("DOMContentLoaded", async () => {
     // =========================
     
     function procesarGasolina(data) {
-        if (!data.mejor) return;
+        if (!data) return;
 
         const mejor = data.mejor;
         
-        setElement('better-price', `${mejor.precio.toFixed(3).replace('.', ',')} €/L`);
-        setElement('better-station', `📍 ${mejor.estacion}`);
+        setElement('fuel-best-price', formatPrice(mejor.precio));
+        setElement('fuel-best-station', `📍 ${mejor.estacion}`);
         
-        const alertBadge = document.getElementById('better-alert');
+        const alertBadge = document.getElementById('fuel-alert');
         alertBadge.textContent = mejor.alerta;
         alertBadge.className = `badge ${mejor.estado}`;
 
         if (data.promedio) {
-            setElement('avg-price', `${data.promedio.toFixed(3).replace('.', ',')}€`);
+            setElement('fuel-avg', formatPrice(data.promedio));
         }
 
-        setElement('total-stations', data.total || 0);
+        setElement('total-stations', `${data.total} estaciones`);
 
         if (data.peor) {
-            setElement('worst-price', `${data.peor.precio.toFixed(3).replace('.', ',')} €/L`);
-            setElement('worst-station', `📍 ${data.peor.estacion}`);
+            setElement('fuel-worst', formatPrice(data.peor.precio));
         }
 
-        // Procesar Top 3
+        // Top 3 gasolineras
         if (data.top3 && data.top3.length > 0) {
-            procesarTop3(data.top3);
-        }
-    }
+            const top3List = document.getElementById('fuel-top3');
+            top3List.innerHTML = '';
 
-    // =========================
-    // PROCESAR TOP 3
-    // =========================
-    
-    function procesarTop3(top3) {
-        if (!top3 || top3.length === 0) {
-            setElement('top3-list', '<li style="text-align: center; color: #999; padding: 30px;">Sin datos disponibles</li>');
-            return;
-        }
-
-        let html = '';
-        for (const item of top3) {
-            html += `
-                <li class="top3-item">
-                    <div class="top3-position">
-                        ${item.posicion === 1 ? '🥇' : item.posicion === 2 ? '🥈' : '🥉'}
+            data.top3.forEach(station => {
+                const li = document.createElement('li');
+                li.className = 'top-item';
+                li.innerHTML = `
+                    <div class="top-position">${station.posicion}🥇</div>
+                    <div class="top-content">
+                        <div class="top-name">${station.estacion}</div>
+                        <div class="top-price">${formatPrice(station.precio)}</div>
                     </div>
-                    <div class="top3-content">
-                        <div class="top3-station">${item.estacion}</div>
-                        <div class="top3-price">${item.precio.toFixed(3).replace('.', ',')} €/L</div>
-                    </div>
-                </li>
-            `;
-        }
-
-        const list = document.getElementById('top3-list');
-        list.innerHTML = html;
-    }
-
-    // =========================
-    // PROCESAR ENERGÍA
-    // =========================
-    
-    function procesarEnergia(data) {
-        if (data.luz) {
-            setElement('light-price', `${data.luz.precio.toFixed(3).replace('.', ',')} €`);
-            setElement('light-status', data.luz.estado);
-        }
-
-        if (data.gas) {
-            setElement('gas-price', `${data.gas.precio.toFixed(3).replace('.', ',')} €`);
-        }
-    }
-
-    // =========================
-    // MOSTRAR ERROR
-    // =========================
-    
-    function mostrarError(mensaje) {
-        setElement('better-price', '❌ Error');
-        setElement('better-station', mensaje || 'No se pudieron cargar los datos');
-        setElement('light-price', '--');
-        setElement('gas-price', '--');
-        setElement('api-status', '❌ Desconectado');
-    }
-
-    // =========================
-    // FORMATEAR FECHA
-    // =========================
-
-    function formatearFecha(isoString) {
-        try {
-            const date = new Date(isoString);
-            return date.toLocaleString('es-ES', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
+                `;
+                top3List.appendChild(li);
             });
-        } catch (e) {
-            return '--';
         }
     }
 
     // =========================
-    // INICIALIZACIÓN
+    // PROCESAR PRESUPUESTO
     // =========================
     
-    // Cargar datos al iniciar
+    function procesarPresupuesto(presupuesto) {
+        if (!presupuesto) return;
+
+        const gastado = presupuesto.gasto_acumulado;
+        const saldo = presupuesto.saldo_restante;
+        const mensual = presupuesto.mensual;
+        const dias = presupuesto.dias_restantes;
+
+        setElement('budget-spent', formatMoney(gastado));
+        setElement('budget-remaining', formatMoney(saldo));
+        
+        const porcentaje = (gastado / mensual * 100).toFixed(1);
+        setElement('budget-percentage', `${porcentaje}%`);
+
+        const bar = document.getElementById('budget-bar');
+        if (bar) {
+            bar.style.width = `${Math.min(porcentaje, 100)}%`;
+        }
+
+        setElement('budget-days', `${dias} días`);
+        
+        const gastoDiarioMedio = dias > 0 ? (saldo / dias).toFixed(2) : '0.00';
+        setElement('budget-daily', formatMoney(parseFloat(gastoDiarioMedio)));
+
+        const alertEl = document.getElementById('budget-alert');
+        alertEl.textContent = presupuesto.alerta;
+        
+        if (presupuesto.alerta.includes('⚠️')) {
+            alertEl.className = 'badge warn';
+        } else if (presupuesto.alerta.includes('✅')) {
+            alertEl.className = 'badge ok';
+        }
+    }
+
+    // =========================
+    // PROCESAR RECOMENDACIONES
+    // =========================
+    
+    function procesarRecomendaciones(recomendaciones) {
+        if (!recomendaciones || recomendaciones.length === 0) return;
+
+        const container = document.getElementById('recommendations');
+        container.innerHTML = '';
+
+        recomendaciones.forEach(rec => {
+            const card = document.createElement('div');
+            card.className = 'recommendation-card';
+            card.innerHTML = `
+                <div class="rec-icon">${rec.icono}</div>
+                <div class="rec-title">${rec.titulo}</div>
+                <div class="rec-detail">${rec.detalle}</div>
+                <div class="rec-saving">+${formatMoney(rec.ahorro_estimado)} de ahorro</div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    // =========================
+    // PROCESAR RESUMEN FINANCIERO
+    // =========================
+    
+    function procesarResumenFinanciero(resumen) {
+        if (!resumen) return;
+
+        setElement('fin-electricity', formatMoney(resumen.electricidad));
+        setElement('fin-gas', formatMoney(resumen.gas));
+        setElement('fin-fuel', formatMoney(resumen.gasolina));
+        setElement('fin-total', formatMoney(resumen.total_mensual));
+    }
+
+    // =========================
+    // INICIAR CARGA
+    // =========================
+    
     await cargarDatos();
+
+    // Recargar datos cada 10 minutos
+    setInterval(cargarDatos, 600000);
 
 });
