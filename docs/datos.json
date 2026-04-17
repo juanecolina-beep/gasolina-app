@@ -1,19 +1,181 @@
 {
-  "timestamp": "2026-04-17T19:02:17.303424",
-  "status": "ok",
-  "resumen_financiero": {
-    "electricidad": 100.5,
-    "gas": 22.8,
-    "gasolina": 69.33,
-    "total_mensual": 192.63,
-    "moneda": "EUR"
+  "timestamp": "2026-04-17T19:40:39.171425",
+  "electricidad": {
+    "horas": [
+      {
+        "hora": "00:00",
+        "precio": 0.0677,
+        "estado": "🟡 Media",
+        "categoria": "medium"
+      },
+      {
+        "hora": "01:00",
+        "precio": 0.0578,
+        "estado": "🟡 Media",
+        "categoria": "medium"
+      },
+      {
+        "hora": "02:00",
+        "precio": 0.0536,
+        "estado": "🟡 Media",
+        "categoria": "medium"
+      },
+      {
+        "hora": "03:00",
+        "precio": 0.0469,
+        "estado": "🟢 Barata",
+        "categoria": "cheap"
+      },
+      {
+        "hora": "04:00",
+        "precio": 0.0551,
+        "estado": "🟡 Media",
+        "categoria": "medium"
+      },
+      {
+        "hora": "05:00",
+        "precio": 0.0704,
+        "estado": "🟡 Media",
+        "categoria": "medium"
+      },
+      {
+        "hora": "06:00",
+        "precio": 0.0951,
+        "estado": "🟡 Media",
+        "categoria": "medium"
+      },
+      {
+        "hora": "07:00",
+        "precio": 0.1354,
+        "estado": "🟡 Media",
+        "categoria": "medium"
+      },
+      {
+        "hora": "08:00",
+        "precio": 0.1676,
+        "estado": "🟡 Media",
+        "categoria": "medium"
+      },
+      {
+        "hora": "09:00",
+        "precio": 0.1509,
+        "estado": "🟡 Media",
+        "categoria": "medium"
+      },
+      {
+        "hora": "10:00",
+        "precio": 0.1436,
+        "estado": "🟡 Media",
+        "categoria": "medium"
+      },
+      {
+        "hora": "11:00",
+        "precio": 0.1271,
+        "estado": "🟡 Media",
+        "categoria": "medium"
+      },
+      {
+        "hora": "12:00",
+        "precio": 0.1148,
+        "estado": "🟡 Media",
+        "categoria": "medium"
+      },
+      {
+        "hora": "13:00",
+        "precio": 0.1277,
+        "estado": "🟡 Media",
+        "categoria": "medium"
+      },
+      {
+        "hora": "14:00",
+        "precio": 0.1441,
+        "estado": "🟡 Media",
+        "categoria": "medium"
+      },
+      {
+        "hora": "15:00",
+        "precio": 0.1615,
+        "estado": "🟡 Media",
+        "categoria": "medium"
+      },
+      {
+        "hora": "16:00",
+        "precio": 0.1975,
+        "estado": "🟡 Media",
+        "categoria": "medium"
+      },
+      {
+        "hora": "17:00",
+        "precio": 0.2144,
+        "estado": "🔴 Cara",
+        "categoria": "expensive"
+      },
+      {
+        "hora": "18:00",
+        "precio": 0.233,
+        "estado": "🔴 Cara",
+        "categoria": "expensive"
+      },
+      {
+        "hora": "19:00",
+        "precio": 0.2351,
+        "estado": "🔴 Cara",
+        "categoria": "expensive"
+      },
+      {
+        "hora": "20:00",
+        "precio": 0.2358,
+        "estado": "🔴 Cara",
+        "categoria": "expensive"
+      },
+      {
+        "hora": "21:00",
+        "precio": 0.1942,
+        "estado": "🟡 Media",
+        "categoria": "medium"
+      },
+      {
+        "hora": "22:00",
+        "precio": 0.1439,
+        "estado": "🟡 Media",
+        "categoria": "medium"
+      },
+      {
+        "hora": "23:00",
+        "precio": 0.0883,
+        "estado": "🟡 Media",
+        "categoria": "medium"
+      }
+    ],
+    "precio_minimo": 0.0469,
+    "precio_maximo": 0.2358,
+    "precio_promedio": 0.1359,
+    "mejor_ventana": {
+      "inicio": "01:00",
+      "fin": "05:00",
+      "promedio": 0.0534
+    },
+    "coste_diario_estimado": 3.4,
+    "coste_mensual_estimado": 101.92
+  },
+  "gas": {
+    "precio_kwh": 0.0389,
+    "termino_fijo_diario": 0.35,
+    "consumo_estimado_diario": 8,
+    "consumo_estimado_mensual": 240,
+    "coste_variable_diario": 0.31,
+    "coste_fijo_diario": 0.35,
+    "coste_diario_total": 0.66,
+    "coste_mensual_total": 19.8,
+    "alerta": "⚠️ Cambio de tarifa detectado",
+    "tendencia": "sube",
+    "tarifa_type": "T1 - Residencial",
+    "unidad": "€/kWh"
   },
   "gasolina": {
     "mejor": {
       "estacion": "REPSOL Seseña",
       "precio": 1.749,
-      "alerta": "🟢 MUY BARATA",
-      "estado": "ok",
       "localidad": "Seseña"
     },
     "peor": {
@@ -22,220 +184,98 @@
       "localidad": "Seseña"
     },
     "promedio": 1.774,
-    "total": 6,
-    "top3": [
-      {
-        "posicion": 1,
-        "estacion": "REPSOL Seseña",
-        "precio": 1.749,
-        "localidad": "Seseña"
-      },
-      {
-        "posicion": 2,
-        "estacion": "REPSOL Aranjuez",
-        "precio": 1.759,
-        "localidad": "Aranjuez"
-      },
-      {
-        "posicion": 3,
-        "estacion": "REPSOL Seseña Premium",
-        "precio": 1.769,
-        "localidad": "Seseña"
-      }
-    ],
     "presupuesto": {
-      "mensual": 100,
-      "gasto_acumulado": 69.33,
-      "saldo_restante": 30.67,
-      "dias_restantes": 10,
-      "alerta": ""
-    }
-  },
-  "electricidad": {
-    "horas": [
-      {
-        "hora": "00:00",
-        "precio": 0.0657,
-        "estado": "🟡 Media",
-        "categoria": "medium"
-      },
-      {
-        "hora": "01:00",
-        "precio": 0.0557,
-        "estado": "🟡 Media",
-        "categoria": "medium"
-      },
-      {
-        "hora": "02:00",
-        "precio": 0.0523,
-        "estado": "🟢 Barata",
-        "categoria": "cheap"
-      },
-      {
-        "hora": "03:00",
-        "precio": 0.048,
-        "estado": "🟢 Barata",
-        "categoria": "cheap"
-      },
-      {
-        "hora": "04:00",
-        "precio": 0.0537,
-        "estado": "🟡 Media",
-        "categoria": "medium"
-      },
-      {
-        "hora": "05:00",
-        "precio": 0.0703,
-        "estado": "🟡 Media",
-        "categoria": "medium"
-      },
-      {
-        "hora": "06:00",
-        "precio": 0.0956,
-        "estado": "🟡 Media",
-        "categoria": "medium"
-      },
-      {
-        "hora": "07:00",
-        "precio": 0.1345,
-        "estado": "🟡 Media",
-        "categoria": "medium"
-      },
-      {
-        "hora": "08:00",
-        "precio": 0.1638,
-        "estado": "🟡 Media",
-        "categoria": "medium"
-      },
-      {
-        "hora": "09:00",
-        "precio": 0.1536,
-        "estado": "🟡 Media",
-        "categoria": "medium"
-      },
-      {
-        "hora": "10:00",
-        "precio": 0.1431,
-        "estado": "🟡 Media",
-        "categoria": "medium"
-      },
-      {
-        "hora": "11:00",
-        "precio": 0.1241,
-        "estado": "🟡 Media",
-        "categoria": "medium"
-      },
-      {
-        "hora": "12:00",
-        "precio": 0.11,
-        "estado": "🟡 Media",
-        "categoria": "medium"
-      },
-      {
-        "hora": "13:00",
-        "precio": 0.1208,
-        "estado": "🟡 Media",
-        "categoria": "medium"
-      },
-      {
-        "hora": "14:00",
-        "precio": 0.1346,
-        "estado": "🟡 Media",
-        "categoria": "medium"
-      },
-      {
-        "hora": "15:00",
-        "precio": 0.1579,
-        "estado": "🟡 Media",
-        "categoria": "medium"
-      },
-      {
-        "hora": "16:00",
-        "precio": 0.1901,
-        "estado": "🟡 Media",
-        "categoria": "medium"
-      },
-      {
-        "hora": "17:00",
-        "precio": 0.2121,
-        "estado": "🟡 Media",
-        "categoria": "medium"
-      },
-      {
-        "hora": "18:00",
-        "precio": 0.2288,
-        "estado": "🔴 Cara",
-        "categoria": "expensive"
-      },
-      {
-        "hora": "19:00",
-        "precio": 0.2545,
-        "estado": "🔴 Cara",
-        "categoria": "expensive"
-      },
-      {
-        "hora": "20:00",
-        "precio": 0.2204,
-        "estado": "🔴 Cara",
-        "categoria": "expensive"
-      },
-      {
-        "hora": "21:00",
-        "precio": 0.1859,
-        "estado": "🟡 Media",
-        "categoria": "medium"
-      },
-      {
-        "hora": "22:00",
-        "precio": 0.1509,
-        "estado": "🟡 Media",
-        "categoria": "medium"
-      },
-      {
-        "hora": "23:00",
-        "precio": 0.0892,
-        "estado": "🟡 Media",
-        "categoria": "medium"
-      }
-    ],
-    "precio_minimo": 0.048,
-    "precio_maximo": 0.2545,
-    "precio_promedio": 0.134,
-    "mejor_ventana": {
-      "inicio": "01:00",
-      "fin": "05:00",
-      "promedio": 0.0524
+      "total": 100,
+      "litros_posibles": 56.4,
+      "porcentaje_gastado": 100,
+      "alerta": "🔴 Límite"
     },
-    "coste_diario_estimado": 3.35,
-    "coste_mensual_estimado": 100.5
+    "estaciones": [
+      {
+        "nombre": "REPSOL Aranjuez",
+        "precio": 1.759,
+        "localidad": "Aranjuez",
+        "lat": 40.0,
+        "lon": -3.6
+      },
+      {
+        "nombre": "CEPSA Aranjuez",
+        "precio": 1.779,
+        "localidad": "Aranjuez",
+        "lat": 40.0,
+        "lon": -3.6
+      },
+      {
+        "nombre": "Shell Aranjuez",
+        "precio": 1.789,
+        "localidad": "Aranjuez",
+        "lat": 40.0,
+        "lon": -3.6
+      },
+      {
+        "nombre": "REPSOL Seseña",
+        "precio": 1.749,
+        "localidad": "Seseña",
+        "lat": 40.0,
+        "lon": -3.6
+      },
+      {
+        "nombre": "BP Seseña",
+        "precio": 1.799,
+        "localidad": "Seseña",
+        "lat": 40.0,
+        "lon": -3.6
+      },
+      {
+        "nombre": "REPSOL Seseña Premium",
+        "precio": 1.769,
+        "localidad": "Seseña",
+        "lat": 40.0,
+        "lon": -3.6
+      }
+    ]
   },
-  "gas": {
-    "precio_kwh": 0.0507,
-    "termino_fijo_diario": 0.35,
-    "consumo_estimado_diario": 8,
-    "consumo_estimado_mensual": 240,
-    "coste_variable_diario": 0.41,
-    "coste_fijo_diario": 0.35,
-    "coste_diario_total": 0.76,
-    "coste_mensual_total": 22.8,
-    "alerta": "⚠️ Cambio de tarifa detectado",
-    "tarifa_type": "T1 - Residencial",
-    "unidad": "€/kWh"
+  "comparador": {
+    "seseña": {
+      "nombre": "REPSOL Seseña",
+      "precio": 1.749,
+      "localidad": "Seseña",
+      "lat": 40.0,
+      "lon": -3.6
+    },
+    "aranjuez": {
+      "nombre": "REPSOL Aranjuez",
+      "precio": 1.759,
+      "localidad": "Aranjuez",
+      "lat": 40.0,
+      "lon": -3.6
+    },
+    "diferencia_precio": -0.01,
+    "ahorro_deposito": -0.5,
+    "ahorro_mensual_estimado": -4.0,
+    "recomendacion": "🔴 SESEÑA MEJOR"
   },
   "recomendaciones": [
     {
-      "tipo": "electricidad",
-      "icono": "⚡",
-      "titulo": "Mejor horario",
-      "detalle": "Entre 01:00-05:00",
-      "ahorro_estimado": 15.07
+      "tipo": "Electricidad",
+      "titulo": "⚡ Ahorro en horas valle",
+      "descripcion": "Usa lavadora entre 01:00-05:00",
+      "ahorro_estimado": 15.29,
+      "urgencia": "media"
     },
     {
-      "tipo": "general",
-      "icono": "💡",
-      "titulo": "Consejo",
-      "detalle": "Cargar en horas valle",
-      "ahorro_estimado": 5.0
+      "tipo": "Gas",
+      "titulo": "🔥 Cambio de tarifa detectado",
+      "descripcion": "Revisa contrato Naturgy. Tarifa al alza",
+      "ahorro_estimado": 0,
+      "urgencia": "media"
+    },
+    {
+      "tipo": "General",
+      "titulo": "💡 Consejo del día",
+      "descripcion": "Recuerda revisar tus consumos mensuales",
+      "ahorro_estimado": 0,
+      "urgencia": "baja"
     }
   ]
 }
