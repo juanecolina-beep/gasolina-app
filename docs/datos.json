@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-04-17T18:05:14.339890",
+  "timestamp": "2026-04-17T19:02:17.303424",
   "status": "ok",
   "resumen_financiero": {
     "electricidad": 100.5,
-    "gas": 20.7,
-    "gasolina": 68.01,
-    "total_mensual": 189.21,
+    "gas": 22.8,
+    "gasolina": 69.33,
+    "total_mensual": 192.63,
     "moneda": "EUR"
   },
   "gasolina": {
@@ -45,8 +45,8 @@
     ],
     "presupuesto": {
       "mensual": 100,
-      "gasto_acumulado": 68.01,
-      "saldo_restante": 31.99,
+      "gasto_acumulado": 69.33,
+      "saldo_restante": 30.67,
       "dias_restantes": 10,
       "alerta": ""
     }
@@ -55,169 +55,169 @@
     "horas": [
       {
         "hora": "00:00",
-        "precio": 0.0659,
+        "precio": 0.0657,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "01:00",
-        "precio": 0.0581,
+        "precio": 0.0557,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "02:00",
-        "precio": 0.0508,
+        "precio": 0.0523,
         "estado": "🟢 Barata",
         "categoria": "cheap"
       },
       {
         "hora": "03:00",
-        "precio": 0.0484,
+        "precio": 0.048,
         "estado": "🟢 Barata",
         "categoria": "cheap"
       },
       {
         "hora": "04:00",
-        "precio": 0.0532,
-        "estado": "🟢 Barata",
-        "categoria": "cheap"
+        "precio": 0.0537,
+        "estado": "🟡 Media",
+        "categoria": "medium"
       },
       {
         "hora": "05:00",
-        "precio": 0.0689,
+        "precio": 0.0703,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "06:00",
-        "precio": 0.092,
+        "precio": 0.0956,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "07:00",
-        "precio": 0.1334,
+        "precio": 0.1345,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "08:00",
-        "precio": 0.1687,
+        "precio": 0.1638,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "09:00",
-        "precio": 0.1542,
+        "precio": 0.1536,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "10:00",
-        "precio": 0.1456,
+        "precio": 0.1431,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "11:00",
-        "precio": 0.1272,
+        "precio": 0.1241,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "12:00",
-        "precio": 0.1163,
+        "precio": 0.11,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "13:00",
-        "precio": 0.1261,
+        "precio": 0.1208,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "14:00",
-        "precio": 0.1442,
+        "precio": 0.1346,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "15:00",
-        "precio": 0.1496,
+        "precio": 0.1579,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "16:00",
-        "precio": 0.2071,
-        "estado": "🔴 Cara",
-        "categoria": "expensive"
+        "precio": 0.1901,
+        "estado": "🟡 Media",
+        "categoria": "medium"
       },
       {
         "hora": "17:00",
-        "precio": 0.2131,
-        "estado": "🔴 Cara",
-        "categoria": "expensive"
+        "precio": 0.2121,
+        "estado": "🟡 Media",
+        "categoria": "medium"
       },
       {
         "hora": "18:00",
-        "precio": 0.2266,
+        "precio": 0.2288,
         "estado": "🔴 Cara",
         "categoria": "expensive"
       },
       {
         "hora": "19:00",
-        "precio": 0.2427,
+        "precio": 0.2545,
         "estado": "🔴 Cara",
         "categoria": "expensive"
       },
       {
         "hora": "20:00",
-        "precio": 0.2248,
+        "precio": 0.2204,
         "estado": "🔴 Cara",
         "categoria": "expensive"
       },
       {
         "hora": "21:00",
-        "precio": 0.1763,
+        "precio": 0.1859,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "22:00",
-        "precio": 0.1397,
+        "precio": 0.1509,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "23:00",
-        "precio": 0.0835,
+        "precio": 0.0892,
         "estado": "🟡 Media",
         "categoria": "medium"
       }
     ],
-    "precio_minimo": 0.0484,
-    "precio_maximo": 0.2427,
+    "precio_minimo": 0.048,
+    "precio_maximo": 0.2545,
     "precio_promedio": 0.134,
     "mejor_ventana": {
       "inicio": "01:00",
       "fin": "05:00",
-      "promedio": 0.0526
+      "promedio": 0.0524
     },
     "coste_diario_estimado": 3.35,
     "coste_mensual_estimado": 100.5
   },
   "gas": {
-    "precio_kwh": 0.0427,
+    "precio_kwh": 0.0507,
     "termino_fijo_diario": 0.35,
     "consumo_estimado_diario": 8,
     "consumo_estimado_mensual": 240,
-    "coste_variable_diario": 0.34,
+    "coste_variable_diario": 0.41,
     "coste_fijo_diario": 0.35,
-    "coste_diario_total": 0.69,
-    "coste_mensual_total": 20.7,
+    "coste_diario_total": 0.76,
+    "coste_mensual_total": 22.8,
     "alerta": "⚠️ Cambio de tarifa detectado",
     "tarifa_type": "T1 - Residencial",
     "unidad": "€/kWh"
