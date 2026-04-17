@@ -1,33 +1,33 @@
 {
-  "timestamp": "2026-04-17T17:45:21.637082",
+  "timestamp": "2026-04-17T17:58:08.086298",
   "status": "ok",
   "gasolina": {
     "mejor": {
-      "estacion": "Gasolina Express",
+      "estacion": "REPSOL Seseña",
       "precio": 1.749,
       "alerta": "🚨 MUY BARATA",
       "estado": "ok"
     },
     "peor": {
-      "estacion": "BP Energía",
+      "estacion": "BP Seseña",
       "precio": 1.799
     },
-    "promedio": 1.773,
-    "total": 5,
+    "promedio": 1.774,
+    "total": 6,
     "top3": [
       {
         "posicion": 1,
-        "estacion": "Gasolina Express",
+        "estacion": "REPSOL Seseña",
         "precio": 1.749
       },
       {
         "posicion": 2,
-        "estacion": "Cepsa Plus",
+        "estacion": "REPSOL Aranjuez",
         "precio": 1.759
       },
       {
         "posicion": 3,
-        "estacion": "Repsol Slover",
+        "estacion": "REPSOL Seseña Premium",
         "precio": 1.769
       }
     ]

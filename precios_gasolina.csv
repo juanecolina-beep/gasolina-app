@@ -1,7 +1,7 @@
-id;fecha;estacion;direccion;precio
-1;2026-03-07;REPSOL;AUTOVIA A-4 KM. 36,5;1.689
-2;2026-03-07;REPSOL;CR A-4, 32;1.685
-3;2026-03-08;REPSOL;AUTOVIA A-4 KM. 36,5;1.709
-4;2026-03-08;REPSOL;CR A-4, 32;1.695
-5;2026-03-09;REPSOL;AUTOVIA A-4 KM. 36,5;1.709
-6;2026-03-09;REPSOL;CR A-4, 32;1.695
+id;fecha;estacion;direccion;precio;localidad
+1;2026-04-17;REPSOL Aranjuez;Calle de la Industria, 23;1.759;Aranjuez
+2;2026-04-17;CEPSA Aranjuez;Av. del Príncipe Carlos, 45;1.779;Aranjuez
+3;2026-04-17;Shell Aranjuez;Carretera Toledo-Cuenca;1.789;Aranjuez
+4;2026-04-17;REPSOL Seseña;Autovía A-4 KM. 32;1.749;Seseña
+5;2026-04-17;BP Seseña;Ctra. Nacional 430;1.799;Seseña
+6;2026-04-17;REPSOL Seseña Premium;Calle Industrial 56;1.769;Seseña

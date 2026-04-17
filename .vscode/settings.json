@@ -1,0 +1,8 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "/^Get-Content \"c:\\\\Users\\\\USER\\\\Documents\\\\gasolina-app\\\\docs\\\\datos\\.json\" \\| ConvertFrom-Json \\| ConvertTo-Json -Depth 10 \\| Select-String -SimpleMatch \"Seseña\\|Aranjuez\\|estacion\" -Context 2,0$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}
