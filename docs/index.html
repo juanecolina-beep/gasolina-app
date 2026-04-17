@@ -1,200 +1,447 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
     <meta charset="utf-8">
-    <title>Gasolina + Energía Seseña</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⛽ Gasolina + ⚡ Energía - Dashboard Seseña</title>
     <style>
-        body {
-            font-family: Arial;
-            max-width: 900px;
-            margin: auto;
-            padding: 20px;
-            background: #fafafa;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        h1 { text-align: center; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        header h1 {
+            font-size: 2.8em;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 15px rgba(0,0,0,0.3);
+            letter-spacing: -0.5px;
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .status-bar {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 15px 25px;
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255,255,255,0.2);
+            font-weight: 600;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
 
         .card {
-            background: #ffffff;
-            padding: 15px;
-            border-radius: 10px;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 45px rgba(0,0,0,0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: slideUp 0.6s ease-out;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+        }
+
+        .card h2 {
+            color: #667eea;
             margin-bottom: 20px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            font-size: 1.4em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        .top3 {
-            background: #eef6ff;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 14px;
-            white-space: pre-wrap;
+        .card h2::before {
+            content: attr(data-icon);
+            font-size: 1.2em;
         }
 
-        .meta {
-            font-size: 13px;
+        .price-big {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #667eea;
+            margin: 15px 0;
+            line-height: 1;
+        }
+
+        .station-name {
             color: #666;
+            font-size: 1em;
+            margin-bottom: 15px;
         }
 
-        .highlight {
-            font-size: 18px;
+        .badge {
+            display: inline-block;
+            padding: 10px 18px;
+            border-radius: 25px;
+            font-size: 0.95em;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .badge.ok {
+            background: #10b981;
+            color: white;
+        }
+
+        .badge.warn {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .badge.bad {
+            background: #ef4444;
+            color: white;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .stat-item {
+            background: #f3f4f6;
+            padding: 12px;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.8em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.6em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .energy-items {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .energy-card {
+            background: #f3f4f6;
+            padding: 20px;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+            text-align: center;
+        }
+
+        .energy-card.gas {
+            border-left-color: #f59e0b;
+        }
+
+        .energy-label {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .energy-price {
+            font-size: 2em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .energy-status {
+            font-size: 0.9em;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .top3-list {
+            list-style: none;
+        }
+
+        .top3-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: linear-gradient(135deg, #f3f4f6 0%, #ffffff 100%);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border-left: 5px solid #667eea;
+            transition: transform 0.2s ease;
+        }
+
+        .top3-item:hover {
+            transform: translateX(5px);
+        }
+
+        .top3-item:nth-child(1) { border-left-color: #fbbf24; }
+        .top3-item:nth-child(2) { border-left-color: #a78bfa; }
+        .top3-item:nth-child(3) { border-left-color: #f87171; }
+
+        .top3-position {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            font-size: 1.2em;
+        }
+
+        .top3-item:nth-child(1) .top3-position {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        }
+
+        .top3-item:nth-child(2) .top3-position {
+            background: linear-gradient(135deg, #a78bfa, #8b5cf6);
+        }
+
+        .top3-item:nth-child(3) .top3-position {
+            background: linear-gradient(135deg, #f87171, #ef4444);
+        }
+
+        .top3-content {
+            flex: 1;
+        }
+
+        .top3-station {
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 4px;
+            font-size: 1.05em;
+        }
+
+        .top3-price {
+            font-size: 1.5em;
+            color: #10b981;
             font-weight: bold;
         }
 
-        .status {
-            font-size: 14px;
-            margin-top: 5px;
-            font-weight: bold;
+        .meta-info {
+            font-size: 0.85em;
+            color: #999;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+            line-height: 1.8;
         }
 
-        .ok { color: green; }
-        .warn { color: orange; }
-        .bad { color: red; }
+        .loading {
+            color: #667eea;
+            font-weight: 600;
+        }
 
-        img {
-            max-width: 100%;
-            border-radius: 8px;
-            background: #f0f0f0;
-            min-height: 100px;
+        .error-text {
+            color: #ef4444;
+            font-weight: 600;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            font-size: 0.9em;
+            opacity: 0.8;
+            padding: 20px;
+            margin-top: 40px;
+        }
+
+        .footer-link {
+            color: white;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+            transition: border-color 0.3s ease;
+        }
+
+        .footer-link:hover {
+            border-bottom-color: white;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2em;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .energy-items {
+                grid-template-columns: 1fr;
+            }
+
+            .price-big {
+                font-size: 2em;
+            }
+
+            .card {
+                padding: 20px;
+            }
         }
     </style>
 </head>
 
 <body>
+    <div class="container">
+        <!-- HEADER -->
+        <header>
+            <h1>⛽ Gasolina + ⚡ Energía</h1>
+            <p>Dashboard en tiempo real - Seseña</p>
+        </header>
 
-<h1>⛽ Gasolina + ⚡ Energía (Seseña)</h1>
+        <!-- STATUS BAR -->
+        <div class="status-bar" id="status-bar">
+            <span id="status-icon">🔄</span>
+            <span id="status-text"> Cargando datos...</span>
+        </div>
 
-<!-- SISTEMA -->
-<div class="card">
-    <p id="update" class="meta">🕒 Última actualización: cargando...</p>
-    <p id="total" class="meta">⛽ Estaciones analizadas: 0</p>
-    <p id="status" class="status warn">🔄 Inicializando sistema...</p>
-</div>
+        <!-- GRID PRINCIPAL -->
+        <div class="grid">
 
-<!-- MEJOR PRECIO -->
-<div class="card">
-    <h2>💰 Mejor precio hoy</h2>
-    <p id="barata" class="highlight">Cargando...</p>
-</div>
+            <!-- MEJOR PRECIO -->
+            <div class="card">
+                <h2 data-icon="💰">Mejor precio hoy</h2>
+                <div class="price-big" id="better-price">--</div>
+                <div class="station-name" id="better-station">Cargando...</div>
+                <div id="better-alert" class="badge warn">⏳ Cargando</div>
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-label">Promedio</div>
+                        <div class="stat-value" id="avg-price">--</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Estaciones</div>
+                        <div class="stat-value" id="total-stations">0</div>
+                    </div>
+                </div>
+            </div>
 
-<!-- TOP 3 -->
-<div class="card">
-    <h2>🏆 Top 3 gasolineras</h2>
-    <pre id="top3" class="top3">Cargando...</pre>
-</div>
+            <!-- PEOR PRECIO -->
+            <div class="card">
+                <h2 data-icon="💸">Precio más alto</h2>
+                <div class="price-big" style="color: #ef4444;" id="worst-price">--</div>
+                <div class="station-name" id="worst-station">Cargando...</div>
+                <div style="color: #ef4444; font-weight: 600; margin-top: 10px;">🔴 Más caro</div>
+            </div>
 
-<!-- ENERGÍA -->
-<div class="card">
-    <h2>⚡ Energía hoy</h2>
-    <p>⚡ Luz: <span id="luz">Cargando...</span></p>
-    <p>🔥 Gas: <span id="gas">Cargando...</span></p>
-</div>
+            <!-- ENERGÍA -->
+            <div class="card">
+                <h2 data-icon="⚡">Precios energía</h2>
+                <div class="energy-items">
+                    <div class="energy-card">
+                        <div class="energy-label">💡 Luz</div>
+                        <div class="energy-price" id="light-price">--</div>
+                        <div class="energy-status" id="light-status">--</div>
+                    </div>
+                    <div class="energy-card gas">
+                        <div class="energy-label">🔥 Gas</div>
+                        <div class="energy-price" id="gas-price">--</div>
+                        <div class="energy-status">⚖️ Normal</div>
+                    </div>
+                </div>
+            </div>
 
-<!-- HISTÓRICO -->
-<div class="card">
-    <h2>📊 Histórico gasolina</h2>
-    <img id="img_gasolina" alt="Histórico gasolina">
-</div>
+        </div>
 
-<div class="card">
-    <h2>⚡ Histórico energía</h2>
-    <img id="img_energia" alt="Histórico energía">
-</div>
+        <!-- TOP 3 GASOLINERAS -->
+        <div class="card">
+            <h2 data-icon="🏆">Top 3 gasolineras más baratas</h2>
+            <ul class="top3-list" id="top3-list">
+                <li style="text-align: center; color: #999; padding: 30px;">
+                    Cargando datos...
+                </li>
+            </ul>
+        </div>
 
-<!-- DESCARGA -->
-<div class="card">
-    <h2>📥 Descargar datos</h2>
-    <a id="csvlink" href="#">Descargar CSV</a>
-</div>
+        <!-- INFORMACIÓN SISTEMA -->
+        <div class="card">
+            <h2 data-icon="ℹ️">Información del sistema</h2>
+            <div class="meta-info">
+                <p>🕒 <strong>Última actualización:</strong> <span id="timestamp">--</span></p>
+                <p>🔗 <strong>Estado:</strong> <span id="api-status">--</span></p>
+                <p>📊 <strong>Datos:</strong> <span id="data-status">--</span></p>
+            </div>
+        </div>
 
-<!-- CONTROL SCRIPT -->
-<script>
-window.__SCRIPT_OK = false;
-</script>
+        <!-- FOOTER -->
+        <div class="footer">
+            <p>💚 Dashboard | Actualización cada hora | <a href="https://github.com/juanecolina-beep/gasolina-app" class="footer-link">Ver en GitHub</a></p>
+        </div>
 
-<script src="js/script.js"
-        onload="window.__SCRIPT_OK = true"
-        onerror="window.__SCRIPT_OK = false"></script>
+    </div>
 
-<!-- SISTEMA DE CONTROL REAL -->
-<script>
-(function () {
-
-    const status = document.getElementById('status');
-
-    function setStatus(text, cls) {
-        if (!status) return;
-        status.textContent = text;
-        status.className = "status " + cls;
-    }
-
-    function safeSet(id, value) {
-        const el = document.getElementById(id);
-        if (el && (!el.textContent || el.textContent === "Cargando...")) {
-            el.textContent = value;
-        }
-    }
-
-    setTimeout(() => {
-
-        const barata = document.getElementById('barata')?.textContent;
-
-        // ❌ SCRIPT NO CARGÓ
-        if (!window.__SCRIPT_OK) {
-            setStatus("🔴 Script.js no cargado", "bad");
-
-            safeSet('barata', "⚠️ Sin datos");
-            safeSet('luz', "No disponible");
-            safeSet('gas', "No disponible");
-            safeSet('top3', "Sin datos");
-
-            return;
-        }
-
-        // ❌ SCRIPT NO EJECUTÓ BIEN
-        if (!barata || barata === "Cargando...") {
-            setStatus("🔴 Backend sin datos o error JS", "bad");
-
-            safeSet('barata', "⚠️ Sin datos disponibles");
-            safeSet('luz', "No disponible");
-            safeSet('gas', "No disponible");
-            safeSet('top3', "Sin datos disponibles");
-
-            return;
-        }
-
-        // ⚠️ DATOS PARCIALES
-        if (barata.includes("⚠️") || barata.includes("Sin datos")) {
-            setStatus("🟡 Datos incompletos", "warn");
-        } else {
-            setStatus("🟢 Sistema OK", "ok");
-        }
-
-    }, 2000);
-
-    // ERROR GLOBAL JS
-    window.addEventListener("error", () => {
-        setStatus("🔴 Error crítico en JavaScript", "bad");
-    });
-
-})();
-</script>
-
-<!-- CONTROL IMÁGENES -->
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-
-    ["img_gasolina", "img_energia"].forEach(id => {
-        const img = document.getElementById(id);
-        if (!img) return;
-
-        img.onerror = () => {
-            img.style.display = "none";
-        };
-    });
-
-});
-</script>
+    <!-- SCRIPT -->
+    <script src="js/script.js"></script>
 
 </body>
 </html>
