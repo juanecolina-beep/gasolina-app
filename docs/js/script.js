@@ -128,6 +128,34 @@ function procesarGasolina(data) {
     mostrarAlerta('success', '⛽ Gasolina', `Más barata: ${filtered[0].nombre} @ ${formatPrice(filtered[0].precio)}`);
 }
 
+// ===== PROCESADOR DE RESUMEN MENSUAL =====
+function procesarResumenMensual(data) {
+    if (!data) {
+        console.error('❌ No hay datos para resumen');
+        return;
+    }
+    
+    console.log('📊 Procesando resumen mensual...');
+    
+    // Electricidad
+    const elec = data.electricidad?.coste_mensual_estimado || 0;
+    setElement('mes-electricidad', formatMoney(elec));
+    
+    // Gas
+    const gas = data.gas?.coste_mensual_total || 0;
+    setElement('mes-gas', formatMoney(gas));
+    
+    // Gasolina (presupuesto mensual)
+    const gasolina = data.gasolina?.presupuesto?.total || 0;
+    setElement('mes-gasolina', formatMoney(gasolina));
+    
+    // Total
+    const total = elec + gas + gasolina;
+    setElement('mes-total', formatMoney(total));
+    
+    console.log('✓ Resumen mensual:', { elec, gas, gasolina, total });
+}
+
 // ===== INICIALIZACIÓN =====
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('🚀 Inicializando dashboard...');
@@ -150,6 +178,9 @@ async function cargarDatos() {
         
         const data = await response.json();
         console.log('📊 Datos recibidos:', data);
+        
+        // Procesar resumen mensual
+        procesarResumenMensual(data);
         
         // Procesar todos los datos
         procesarElectricidad(data);
