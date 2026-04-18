@@ -1,4 +1,7 @@
-<!DOCTYPE html>
+import sys
+sys.path.insert(0, r'c:\Users\USER\Documents\gasolina-app\docs')
+
+html = '''<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="utf-8">
@@ -63,4 +66,9 @@
     <div class="alerts" id="alerts-container"></div>
     <script src="js/script.js"></script>
 </body>
-</html>
+</html>'''
+
+with open(r'c:\Users\USER\Documents\gasolina-app\docs\index.html', 'w', encoding='utf-8') as f:
+    f.write(html)
+
+print("✅ HTML generado exitosamente")
