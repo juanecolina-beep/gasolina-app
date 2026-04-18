@@ -119,7 +119,10 @@ function procesarGasolina(data) {
     
     lista.innerHTML = filtered.slice(0, 3).map((g, idx) => `
         <li class="fi ${idx === 0 ? 'best' : ''}">
-            <span class="fn">${g.nombre} (${g.localidad})</span>
+            <div>
+                <div class="fn">${g.nombre}</div>
+                <div style="font-size: 0.85em; color: #666; margin-top: 4px;">📍 ${g.direccion}</div>
+            </div>
             <span class="fp">${formatPrice(g.precio)}</span>
         </li>
     `).join('');

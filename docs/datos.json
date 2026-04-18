@@ -1,172 +1,172 @@
 {
-  "timestamp": "2026-04-18T09:04:13.190294",
+  "timestamp": "2026-04-18T09:23:00.586271",
   "electricidad": {
     "horas": [
       {
         "hora": "00:00",
-        "precio": 0.0646,
+        "precio": 0.064,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "01:00",
-        "precio": 0.0595,
+        "precio": 0.0578,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "02:00",
-        "precio": 0.0527,
-        "estado": "🟡 Media",
-        "categoria": "medium"
+        "precio": 0.0525,
+        "estado": "🟢 Barata",
+        "categoria": "cheap"
       },
       {
         "hora": "03:00",
-        "precio": 0.0467,
+        "precio": 0.049,
         "estado": "🟢 Barata",
         "categoria": "cheap"
       },
       {
         "hora": "04:00",
-        "precio": 0.0527,
+        "precio": 0.0551,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "05:00",
-        "precio": 0.0705,
+        "precio": 0.0726,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "06:00",
-        "precio": 0.0987,
+        "precio": 0.0921,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "07:00",
-        "precio": 0.1322,
+        "precio": 0.1403,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "08:00",
-        "precio": 0.1689,
+        "precio": 0.1697,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "09:00",
-        "precio": 0.1521,
+        "precio": 0.1606,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "10:00",
-        "precio": 0.1373,
+        "precio": 0.1387,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "11:00",
-        "precio": 0.1237,
+        "precio": 0.1307,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "12:00",
-        "precio": 0.1098,
+        "precio": 0.1144,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "13:00",
-        "precio": 0.1311,
+        "precio": 0.1252,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "14:00",
-        "precio": 0.1335,
+        "precio": 0.1403,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "15:00",
-        "precio": 0.1496,
+        "precio": 0.1618,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "16:00",
-        "precio": 0.1902,
+        "precio": 0.2023,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "17:00",
-        "precio": 0.2066,
-        "estado": "🔴 Cara",
-        "categoria": "expensive"
+        "precio": 0.205,
+        "estado": "🟡 Media",
+        "categoria": "medium"
       },
       {
         "hora": "18:00",
-        "precio": 0.225,
+        "precio": 0.2344,
         "estado": "🔴 Cara",
         "categoria": "expensive"
       },
       {
         "hora": "19:00",
-        "precio": 0.2331,
+        "precio": 0.248,
         "estado": "🔴 Cara",
         "categoria": "expensive"
       },
       {
         "hora": "20:00",
-        "precio": 0.2328,
+        "precio": 0.2292,
         "estado": "🔴 Cara",
         "categoria": "expensive"
       },
       {
         "hora": "21:00",
-        "precio": 0.1822,
+        "precio": 0.19,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "22:00",
-        "precio": 0.1439,
+        "precio": 0.1447,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "23:00",
-        "precio": 0.0886,
+        "precio": 0.0884,
         "estado": "🟡 Media",
         "categoria": "medium"
       }
     ],
-    "precio_minimo": 0.0467,
-    "precio_maximo": 0.2331,
-    "precio_promedio": 0.1328,
+    "precio_minimo": 0.049,
+    "precio_maximo": 0.248,
+    "precio_promedio": 0.1361,
     "mejor_ventana": {
       "inicio": "01:00",
       "fin": "05:00",
-      "promedio": 0.0529
+      "promedio": 0.0536
     },
-    "coste_diario_estimado": 3.32,
-    "coste_mensual_estimado": 99.6
+    "coste_diario_estimado": 3.4,
+    "coste_mensual_estimado": 102.07
   },
   "gas": {
-    "precio_kwh": 0.048,
+    "precio_kwh": 0.05,
     "termino_fijo_diario": 0.35,
     "consumo_estimado_diario": 8,
     "consumo_estimado_mensual": 240,
-    "coste_variable_diario": 0.38,
+    "coste_variable_diario": 0.4,
     "coste_fijo_diario": 0.35,
-    "coste_diario_total": 0.73,
-    "coste_mensual_total": 21.9,
+    "coste_diario_total": 0.75,
+    "coste_mensual_total": 22.5,
     "alerta": "✅ Tarifa estable",
     "tendencia": "estable",
     "tarifa_type": "T1 - Residencial",
@@ -176,12 +176,14 @@
     "mejor": {
       "estacion": "REPSOL Seseña",
       "precio": 1.749,
-      "localidad": "Seseña"
+      "localidad": "Seseña",
+      "direccion": "Autovía A-4 KM. 32"
     },
     "peor": {
       "estacion": "BP Seseña",
       "precio": 1.799,
-      "localidad": "Seseña"
+      "localidad": "Seseña",
+      "direccion": "Ctra. Nacional 430"
     },
     "promedio": 1.774,
     "presupuesto": {
@@ -195,6 +197,7 @@
         "nombre": "REPSOL Aranjuez",
         "precio": 1.759,
         "localidad": "Aranjuez",
+        "direccion": "Calle de la Industria, 23",
         "lat": 40.0,
         "lon": -3.6
       },
@@ -202,6 +205,7 @@
         "nombre": "CEPSA Aranjuez",
         "precio": 1.779,
         "localidad": "Aranjuez",
+        "direccion": "Av. del Príncipe Carlos, 45",
         "lat": 40.0,
         "lon": -3.6
       },
@@ -209,6 +213,7 @@
         "nombre": "Shell Aranjuez",
         "precio": 1.789,
         "localidad": "Aranjuez",
+        "direccion": "Carretera Toledo-Cuenca",
         "lat": 40.0,
         "lon": -3.6
       },
@@ -216,6 +221,7 @@
         "nombre": "REPSOL Seseña",
         "precio": 1.749,
         "localidad": "Seseña",
+        "direccion": "Autovía A-4 KM. 32",
         "lat": 40.0,
         "lon": -3.6
       },
@@ -223,6 +229,7 @@
         "nombre": "BP Seseña",
         "precio": 1.799,
         "localidad": "Seseña",
+        "direccion": "Ctra. Nacional 430",
         "lat": 40.0,
         "lon": -3.6
       },
@@ -230,6 +237,7 @@
         "nombre": "REPSOL Seseña Premium",
         "precio": 1.769,
         "localidad": "Seseña",
+        "direccion": "Calle Industrial 56",
         "lat": 40.0,
         "lon": -3.6
       }
@@ -240,6 +248,7 @@
       "nombre": "REPSOL Seseña",
       "precio": 1.749,
       "localidad": "Seseña",
+      "direccion": "Autovía A-4 KM. 32",
       "lat": 40.0,
       "lon": -3.6
     },
@@ -247,6 +256,7 @@
       "nombre": "REPSOL Aranjuez",
       "precio": 1.759,
       "localidad": "Aranjuez",
+      "direccion": "Calle de la Industria, 23",
       "lat": 40.0,
       "lon": -3.6
     },
@@ -260,7 +270,7 @@
       "tipo": "Electricidad",
       "titulo": "⚡ Ahorro en horas valle",
       "descripcion": "Usa lavadora entre 01:00-05:00",
-      "ahorro_estimado": 14.94,
+      "ahorro_estimado": 15.31,
       "urgencia": "media"
     },
     {
