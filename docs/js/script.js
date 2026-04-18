@@ -199,16 +199,5 @@ async function cargarDatos() {
 
 // ===== TEMA OSCURO =====
 function initTemaOscuro() {
-    const html = document.documentElement;
-    const toggle = document.getElementById('theme-toggle');
-    
-    if (!toggle) return;
-    
-    const isDark = localStorage.getItem('theme') === 'dark';
-    if (isDark) html.classList.add('dark-mode');
-    
-    toggle.onclick = () => {
-        const newDark = !html.classList.toggle('dark-mode');
-        localStorage.setItem('theme', newDark ? 'dark' : 'light');
-    };
+    // Tema oscuro deshabilitado por ahora
 }

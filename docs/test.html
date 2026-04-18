@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡🔥⛽ Test Local</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --primary: #667eea; --secondary: #764ba2; --success: #10b981; --warning: #f59e0b; --danger: #ef4444; }
+        body { font-family: "Segoe UI", sans-serif; background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); min-height: 100vh; padding: 20px; color: #1f2937; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        header { text-align: center; color: white; margin-bottom: 40px; }
+        header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .summary { background: rgba(255,255,255,0.1); color: white; padding: 35px; border-radius: 20px; margin-bottom: 30px; }
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; }
+        .summary-item { text-align: center; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 15px; }
+        .summary-label { font-size: 0.85em; opacity: 0.9; margin-bottom: 8px; font-weight: 600; }
+        .summary-value { font-size: 2.2em; font-weight: 700; }
+        .card { background: white; border-radius: 20px; padding: 30px; box-shadow: 0 15px 45px rgba(0,0,0,0.15); }
+        .test-box { background: #fff3cd; border: 1px solid #ffc107; padding: 15px; border-radius: 10px; margin: 20px 0; }
+        button { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header><h1>TEST LOCAL - Verificación de Conexión</h1></header>
+        
+        <div class="test-box">
+            <h2>🔍 Pruebas de Conexión</h2>
+            <p><strong>Estado de carga:</strong> <span id="status">Iniciando...</span></p>
+            <p><strong>Datos JSON:</strong> <span id="json-status">No cargado</span></p>
+            <p><strong>Errores detectados:</strong> <span id="errors">Ninguno</span></p>
+            <button onclick="testFetchData()">🔄 Recargar Datos</button>
+            <button onclick="testDirectFetch()">📡 Test Fetch Directo</button>
+        </div>
+
+        <div class="summary">
+            <h2>📊 Resumen Mensual Estimado</h2>
+            <div class="summary-grid">
+                <div class="summary-item"><div class="summary-label">⚡ Electricidad</div><div class="summary-value" id="mes-electricidad">--</div></div>
+                <div class="summary-item"><div class="summary-label">🔥 Gas</div><div class="summary-value" id="mes-gas">--</div></div>
+                <div class="summary-item"><div class="summary-label">⛽ Gasolina</div><div class="summary-value" id="mes-gasolina">--</div></div>
+                <div class="summary-item"><div class="summary-label">💰 Total</div><div class="summary-value" id="mes-total">--</div></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📝 Logs de Consola</h2>
+            <pre id="console-log" style="background: #f5f5f5; padding: 15px; border-radius: 8px; max-height: 400px; overflow: auto; font-size: 12px;">Iniciando...</pre>
+        </div>
+    </div>
+
+    <script>
+        const logs = [];
+        const originalLog = console.log;
+        const originalError = console.error;
+        
+        // Interceptar logs
+        console.log = function(...args) {
+            logs.push('✓ ' + args.join(' '));
+            updateLogs();
+            originalLog.apply(console, args);
+        };
+        console.error = function(...args) {
+            logs.push('✗ ' + args.join(' '));
+            updateLogs();
+            originalError.apply(console, args);
+        };
+
+        function updateLogs() {
+            document.getElementById('console-log').textContent = logs.join('\n');
+        }
+
+        async function testDirectFetch() {
+            console.log('🔄 Iniciando fetch directo a datos.json...');
+            try {
+                const response = await fetch('./datos.json');
+                console.log(`📊 Response status: ${response.status}`);
+                const data = await response.json();
+                console.log('✓ Datos parseados exitosamente');
+                console.log('Timestamp:', data.timestamp);
+                console.log('Electricidad:', data.electricidad?.coste_mensual_estimado);
+                console.log('Gas:', data.gas?.coste_mensual_total);
+                document.getElementById('json-status').textContent = '✓ Cargado';
+            } catch(err) {
+                console.error('❌ Error:', err.message);
+                document.getElementById('json-status').textContent = '✗ Error: ' + err.message;
+            }
+        }
+
+        async function testFetchData() {
+            document.getElementById('status').textContent = 'Cargando...';
+            try {
+                const response = await fetch('./datos.json');
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                
+                const data = await response.json();
+                console.log('✓ Datos recibidos correctamente');
+                
+                // Procesar resumen
+                const elec = data.electricidad?.coste_mensual_estimado || 0;
+                const gas = data.gas?.coste_mensual_total || 0;
+                const gasolina = data.gasolina?.presupuesto?.total || 0;
+                const total = elec + gas + gasolina;
+                
+                document.getElementById('mes-electricidad').textContent = elec.toFixed(2) + '€';
+                document.getElementById('mes-gas').textContent = gas.toFixed(2) + '€';
+                document.getElementById('mes-gasolina').textContent = gasolina.toFixed(2) + '€';
+                document.getElementById('mes-total').textContent = total.toFixed(2) + '€';
+                
+                document.getElementById('status').textContent = '✓ OK';
+                console.log('✓ Valores mostrados');
+                
+            } catch(err) {
+                document.getElementById('status').textContent = '✗ Error: ' + err.message;
+                console.error('Error:', err);
+            }
+        }
+
+        // Iniciar al cargar
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 Página cargada');
+            testDirectFetch();
+        });
+    </script>
+</body>
+</html>
