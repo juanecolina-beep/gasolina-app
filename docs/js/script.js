@@ -31,7 +31,7 @@ function mostrarAlerta(tipo, titulo, mensaje) {
     }
     
     const alert = document.createElement('div');
-    alert.className = `alert-toast ${tipo}`;
+    alert.className = `alert ${tipo}`;
     alert.innerHTML = `<strong>${titulo}:</strong> ${mensaje}`;
     container.appendChild(alert);
     
@@ -61,11 +61,10 @@ function procesarElectricidad(data) {
     // Crear grid de horas
     const grid = document.getElementById('hours-grid');
     if (grid && elec.horas) {
-        grid.innerHTML = elec.horas.map(h => `
-            <div class="hour-cell ${h.categoria}" title="${h.hora}: ${formatPrice(h.precio)}">
-                ${h.hora.split(':')[0]}h
-            </div>
-        `).join('');
+        grid.innerHTML = elec.horas.map(h => {
+            const cls = h.categoria === 'cheap' ? 'c' : h.categoria === 'medium' ? 'm' : 'e';
+            return `<div class="h ${cls}" title="${h.hora}: ${formatPrice(h.precio)}">${h.hora.split(':')[0]}h</div>`;
+        }).join('');
     }
     
     mostrarAlerta('success', '⚡ Electricidad', `Mejor hora: ${elec.mejor_ventana.inicio}`);
@@ -114,14 +113,14 @@ function procesarGasolina(data) {
     console.log('🔍 Estaciones filtradas:', filtered);
     
     if (filtered.length === 0) {
-        lista.innerHTML = '<li class="fuel-item">No hay datos de gasolineras</li>';
+        lista.innerHTML = '<li class="fi">No hay datos de gasolineras</li>';
         return;
     }
     
     lista.innerHTML = filtered.slice(0, 3).map((g, idx) => `
-        <li class="fuel-item ${idx === 0 ? 'best' : ''}">
-            <span class="fuel-name">${g.nombre} (${g.localidad})</span>
-            <span class="fuel-price">${formatPrice(g.precio)}</span>
+        <li class="fi ${idx === 0 ? 'best' : ''}">
+            <span class="fn">${g.nombre} (${g.localidad})</span>
+            <span class="fp">${formatPrice(g.precio)}</span>
         </li>
     `).join('');
     

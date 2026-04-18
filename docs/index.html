@@ -3,1494 +3,228 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚡🔥⛽ Dashboard Energía - España</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <title>⚡🔥⛽ Dashboard Energía</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --primary: #667eea;
-            --secondary: #764ba2;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            min-height: 100vh;
-            padding: 20px;
-            color: #1f2937;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        header {
-            text-align: center;
-            color: white;
-            margin-bottom: 40px;
-        }
-
-        header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        }
-
-        header p {
-            font-size: 1em;
-            opacity: 0.9;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 25px;
-            margin-bottom: 30px;
-        }
-
-        .card {
-            background: white;
-            border-radius: 20px;
-            padding: 35px;
-            box-shadow: 0 15px 45px rgba(0,0,0,0.15);
-            transition: transform 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-8px);
-        }
-
-        .card h2 {
-            font-size: 1.8em;
-            margin-bottom: 25px;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .price-big {
-            font-size: 3em;
-            font-weight: bold;
-            color: var(--primary);
-            margin: 25px 0;
-            text-align: center;
-        }
-
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 15px;
-            background: #f9fafb;
-            border-radius: 12px;
-            margin: 12px 0;
-            font-size: 1.1em;
-        }
-
-        .info-row .label {
-            font-weight: 600;
-            color: #666;
-        }
-
-        .info-row .value {
-            font-weight: bold;
-            color: var(--primary);
-        }
-
-        .hours-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
-            gap: 8px;
-            margin-top: 20px;
-        }
-
-        .hour-cell {
-            padding: 12px 8px;
-            border-radius: 10px;
-            text-align: center;
-            font-weight: 600;
-            font-size: 0.85em;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-        }
-
-        .hour-cell:hover {
-            transform: scale(1.05);
-        }
-
-        .hour-cell.cheap {
-            background: rgba(16, 185, 129, 0.2);
-            color: var(--success);
-            border: 2px solid var(--success);
-        }
-
-        .hour-cell.medium {
-            background: rgba(245, 158, 11, 0.2);
-            color: var(--warning);
-            border: 2px solid var(--warning);
-        }
-
-        .hour-cell.expensive {
-            background: rgba(239, 68, 68, 0.2);
-            color: var(--danger);
-            border: 2px solid var(--danger);
-        }
-
-        .fuel-list {
-            list-style: none;
-            margin-top: 20px;
-        }
-
-        .fuel-item {
-            padding: 18px;
-            background: #f9fafb;
-            border-radius: 12px;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-left: 5px solid var(--primary);
-        }
-
-        .fuel-item.best {
-            border-left-color: var(--success);
-            background: rgba(16, 185, 129, 0.1);
-        }
-
-        .fuel-name {
-            font-weight: 600;
-            flex: 1;
-        }
-
-        .fuel-price {
-            font-size: 1.4em;
-            font-weight: bold;
-            color: var(--primary);
-        }
-
-        .timestamp {
-            text-align: center;
-            color: white;
-            font-size: 0.9em;
-            margin-top: 30px;
-            opacity: 0.8;
-        }
-
-        .alerts {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-        }
-
-        .alert-toast {
-            background: white;
-            padding: 15px 20px;
-            border-radius: 12px;
-            margin-bottom: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            animation: slideIn 0.3s ease-out;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        .alert-toast.success {
-            border-left: 5px solid var(--success);
-        }
-
-        .alert-toast.warning {
-            border-left: 5px solid var(--warning);
-        }
-
-        .alert-toast.danger {
-            border-left: 5px solid var(--danger);
-        }
-
-        @media (max-width: 768px) {
-            .grid {
-                grid-template-columns: 1fr;
-            }
-            .card h2 {
-                font-size: 1.5em;
-            }
-            .price-big {
-                font-size: 2.2em;
-            }
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --primary: #667eea; --secondary: #764ba2; --success: #10b981; --warning: #f59e0b; --danger: #ef4444; }
+        body { font-family: "Segoe UI", sans-serif; background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); min-height: 100vh; padding: 20px; color: #1f2937; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        header { text-align: center; color: white; margin-bottom: 40px; }
+        header h1 { font-size: 2.5em; margin-bottom: 10px; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        header p { font-size: 1em; opacity: 0.9; }
+        .summary { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); color: white; padding: 35px; border-radius: 20px; margin-bottom: 30px; border: 1px solid rgba(255,255,255,0.2); }
+        .summary h2 { margin: 0 0 25px 0; font-size: 1.5em; }
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; }
+        .summary-item { text-align: center; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 15px; border: 2px solid rgba(255,255,255,0.2); }
+        .summary-label { font-size: 0.85em; opacity: 0.9; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; }
+        .summary-value { font-size: 2.2em; font-weight: 700; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px; margin-bottom: 30px; }
+        .card { background: white; border-radius: 20px; padding: 30px; box-shadow: 0 15px 45px rgba(0,0,0,0.15); }
+        .card:hover { transform: translateY(-8px); transition: transform 0.3s ease; }
+        .card h2 { font-size: 1.6em; margin-bottom: 20px; color: var(--primary); }
+        .row { display: flex; justify-content: space-between; padding: 12px; background: #f9fafb; border-radius: 10px; margin: 10px 0; font-size: 1em; }
+        .row .label { font-weight: 600; color: #666; }
+        .row .value { font-weight: bold; color: var(--primary); }
+        .hours { display: grid; grid-template-columns: repeat(auto-fit, minmax(40px, 1fr)); gap: 6px; margin-top: 15px; }
+        .h { padding: 8px; border-radius: 8px; text-align: center; font-weight: 600; font-size: 0.75em; }
+        .h.c { background: rgba(16, 185, 129, 0.2); color: var(--success); border: 2px solid var(--success); }
+        .h.m { background: rgba(245, 158, 11, 0.2); color: var(--warning); border: 2px solid var(--warning); }
+        .h.e { background: rgba(239, 68, 68, 0.2); color: var(--danger); border: 2px solid var(--danger); }
+        .fuel { list-style: none; margin-top: 15px; }
+        .fi { padding: 15px; background: #f9fafb; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; border-left: 5px solid var(--primary); }
+        .fi.best { border-left-color: var(--success); background: rgba(16, 185, 129, 0.1); }
+        .fn { font-weight: 600; flex: 1; }
+        .fp { font-size: 1.2em; font-weight: bold; color: var(--primary); }
+        .footer { text-align: center; color: white; margin-top: 30px; opacity: 0.8; font-size: 0.9em; }
+        .alerts { position: fixed; top: 20px; right: 20px; z-index: 1000; }
+        .alert { background: white; padding: 12px 16px; border-radius: 10px; margin-bottom: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); border-left: 4px solid var(--primary); animation: slideIn 0.3s ease; font-size: 0.9em; }
+        @keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } header h1 { font-size: 1.8em; } }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>⚡🔥⛽ Dashboard Energía + Combustible</h1>
-            <p>Precios en tiempo real - Iberdrola, Gas y Gasolineras</p>
+            <h1>⚡🔥⛽ Dashboard Energía</h1>
+            <p>Precios actualizados - Electricidad, Gas y Gasolina</p>
         </header>
-
-        <!-- RESUMEN MENSUAL ESTIMADO -->
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 35px; border-radius: 20px; margin-bottom: 30px; box-shadow: 0 15px 45px rgba(0,0,0,0.15);">
-            <h2 style="margin-top: 0; margin-bottom: 25px; font-size: 1.5em; display: flex; align-items: center; gap: 15px;">
-                📊 Resumen Mensual Estimado
-            </h2>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 25px;">
-                <div style="text-align: center; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 15px; border: 2px solid rgba(255,255,255,0.2);">
-                    <div style="font-size: 0.9em; opacity: 0.9; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">⚡ Electricidad</div>
-                    <div style="font-size: 2.5em; font-weight: 700; line-height: 1;" id="mes-electricidad">--</div>
+        <div class="summary">
+            <h2>📊 Resumen Mensual Estimado</h2>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="summary-label">⚡ Electricidad</div>
+                    <div class="summary-value" id="mes-electricidad">--</div>
                 </div>
-                <div style="text-align: center; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 15px; border: 2px solid rgba(255,255,255,0.2);">
-                    <div style="font-size: 0.9em; opacity: 0.9; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">🔥 Gas</div>
-                    <div style="font-size: 2.5em; font-weight: 700; line-height: 1;" id="mes-gas">--</div>
+                <div class="summary-item">
+                    <div class="summary-label">🔥 Gas</div>
+                    <div class="summary-value" id="mes-gas">--</div>
                 </div>
-                <div style="text-align: center; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 15px; border: 2px solid rgba(255,255,255,0.2);">
-                    <div style="font-size: 0.9em; opacity: 0.9; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">⛽ Gasolina</div>
-                    <div style="font-size: 2.5em; font-weight: 700; line-height: 1;" id="mes-gasolina">--</div>
+                <div class="summary-item">
+                    <div class="summary-label">⛽ Gasolina</div>
+                    <div class="summary-value" id="mes-gasolina">--</div>
                 </div>
-                <div style="text-align: center; padding: 20px; background: rgba(16, 185, 129, 0.2); border-radius: 15px; border: 2px solid rgba(16, 185, 129, 0.5);">
-                    <div style="font-size: 0.9em; opacity: 0.9; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">💰 Total</div>
-                    <div style="font-size: 2.5em; font-weight: 700; line-height: 1;" id="mes-total">--</div>
+                <div class="summary-item" style="background: rgba(16, 185, 129, 0.2); border-color: rgba(16, 185, 129, 0.5);">
+                    <div class="summary-label">💰 Total</div>
+                    <div class="summary-value" id="mes-total">--</div>
                 </div>
             </div>
         </div>
-
         <div class="grid">
-            <!-- ELECTRICIDAD -->
             <div class="card">
-                <h2>⚡ Electricidad (Iberdrola)</h2>
-                
-                <div class="info-row">
-                    <span class="label">Hora más barata:</span>
+                <h2>⚡ Electricidad</h2>
+                <div class="row">
+                    <span class="label">Hora barata:</span>
                     <span class="value" id="elec-mejor-hora">--:--</span>
                 </div>
-                
-                <div class="info-row">
-                    <span class="label">Precio promedio:</span>
+                <div class="row">
+                    <span class="label">Promedio:</span>
                     <span class="value" id="elec-promedio">--€</span>
                 </div>
-
-                <h3 style="margin-top: 25px; font-size: 1.1em; color: var(--primary); margin-bottom: 15px; border-bottom: 2px solid var(--primary); padding-bottom: 10px;">
-                    Precios por hora (hoy)
-                </h3>
-                <div class="hours-grid" id="hours-grid"></div>
+                <h3 style="margin-top: 15px; margin-bottom: 10px; color: var(--primary); font-size: 0.95em; border-bottom: 2px solid var(--primary); padding-bottom: 8px;">Precios 24h</h3>
+                <div class="hours" id="hours-grid"></div>
             </div>
-
-            <!-- GAS -->
             <div class="card">
                 <h2>🔥 Gas Natural</h2>
-                
-                <div class="price-big" id="gas-precio">--€</div>
-                
-                <div class="info-row">
-                    <span class="label">Precio por kWh:</span>
+                <div style="font-size: 2em; font-weight: bold; color: var(--primary); text-align: center; margin: 20px 0;" id="gas-precio">--€</div>
+                <div class="row">
+                    <span class="label">€/kWh:</span>
                     <span class="value" id="gas-precio-kwh">--€</span>
                 </div>
-
-                <div class="info-row">
-                    <span class="label">Tarifa:</span>
-                    <span class="value" id="gas-tarifa">T1 Residencial</span>
-                </div>
-
-                <div class="info-row">
-                    <span class="label">Coste mensual:</span>
+                <div class="row">
+                    <span class="label">Mensual:</span>
                     <span class="value" id="gas-coste-mes">--€</span>
                 </div>
-
-                <div class="info-row">
+                <div class="row">
                     <span class="label">Tendencia:</span>
                     <span class="value" id="gas-tendencia">--</span>
                 </div>
             </div>
-
-            <!-- GASOLINA -->
             <div class="card">
-                <h2>⛽ Gasolineras (Más Barata)</h2>
-                
-                <ul class="fuel-list" id="fuel-list">
-                    <li class="fuel-item">Cargando gasolineras...</li>
+                <h2>⛽ Gasolineras</h2>
+                <ul class="fuel" id="fuel-list">
+                    <li class="fi">Cargando...</li>
                 </ul>
             </div>
         </div>
-
-        <div class="timestamp">
-            <p>Última actualización: <span id="timestamp">--</span></p>
+        <div class="footer">
+            <p>🔄 Actualización: <span id="timestamp">--</span></p>
         </div>
     </div>
-
     <div class="alerts" id="alerts-container"></div>
-
     <script src="js/script.js"></script>
 </body>
-</html>
-<!DOCTYPE html>
+</html><!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚡🔥⛽ Dashboard Energía - España</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <title>Dashboard - Energ�a y Combustible</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --primary: #667eea;
-            --secondary: #764ba2;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            min-height: 100vh;
-            padding: 20px;
-            color: #1f2937;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        header {
-            text-align: center;
-            color: white;
-            margin-bottom: 40px;
-        }
-
-        header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        }
-
-        header p {
-            font-size: 1em;
-            opacity: 0.9;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 25px;
-            margin-bottom: 30px;
-        }
-
-        .card {
-            background: white;
-            border-radius: 20px;
-            padding: 35px;
-            box-shadow: 0 15px 45px rgba(0,0,0,0.15);
-            transition: transform 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-8px);
-        }
-
-        .card h2 {
-            font-size: 1.8em;
-            margin-bottom: 25px;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .price-big {
-            font-size: 3em;
-            font-weight: bold;
-            color: var(--primary);
-            margin: 25px 0;
-            text-align: center;
-        }
-
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 15px;
-            background: #f9fafb;
-            border-radius: 12px;
-            margin: 12px 0;
-            font-size: 1.1em;
-        }
-
-        .info-row .label {
-            font-weight: 600;
-            color: #666;
-        }
-
-        .info-row .value {
-            font-weight: bold;
-            color: var(--primary);
-        }
-
-        .hours-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
-            gap: 8px;
-            margin-top: 20px;
-        }
-
-        .hour-cell {
-            padding: 12px 8px;
-            border-radius: 10px;
-            text-align: center;
-            font-weight: 600;
-            font-size: 0.85em;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-        }
-
-        .hour-cell:hover {
-            transform: scale(1.05);
-        }
-
-        .hour-cell.cheap {
-            background: rgba(16, 185, 129, 0.2);
-            color: var(--success);
-            border: 2px solid var(--success);
-        }
-
-        .hour-cell.medium {
-            background: rgba(245, 158, 11, 0.2);
-            color: var(--warning);
-            border: 2px solid var(--warning);
-        }
-
-        .hour-cell.expensive {
-            background: rgba(239, 68, 68, 0.2);
-            color: var(--danger);
-            border: 2px solid var(--danger);
-        }
-
-        .fuel-list {
-            list-style: none;
-            margin-top: 20px;
-        }
-
-        .fuel-item {
-            padding: 18px;
-            background: #f9fafb;
-            border-radius: 12px;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-left: 5px solid var(--primary);
-        }
-
-        .fuel-item.best {
-            border-left-color: var(--success);
-            background: rgba(16, 185, 129, 0.1);
-        }
-
-        .fuel-name {
-            font-weight: 600;
-            flex: 1;
-        }
-
-        .fuel-price {
-            font-size: 1.4em;
-            font-weight: bold;
-            color: var(--primary);
-        }
-
-        .timestamp {
-            text-align: center;
-            color: white;
-            font-size: 0.9em;
-            margin-top: 30px;
-            opacity: 0.8;
-        }
-
-        .alerts {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-        }
-
-        .alert-toast {
-            background: white;
-            padding: 15px 20px;
-            border-radius: 12px;
-            margin-bottom: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            animation: slideIn 0.3s ease-out;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        .alert-toast.success {
-            border-left: 5px solid var(--success);
-        }
-
-        .alert-toast.warning {
-            border-left: 5px solid var(--warning);
-        }
-
-        .alert-toast.danger {
-            border-left: 5px solid var(--danger);
-        }
-
-        @media (max-width: 768px) {
-            .grid {
-                grid-template-columns: 1fr;
-            }
-            .card h2 {
-                font-size: 1.5em;
-            }
-            .price-big {
-                font-size: 2.2em;
-            }
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --primary: #667eea; --secondary: #764ba2; --success: #10b981; --warning: #f59e0b; --danger: #ef4444; }
+        body { font-family: "Segoe UI", sans-serif; background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); min-height: 100vh; padding: 20px; color: #1f2937; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        header { text-align: center; color: white; margin-bottom: 40px; }
+        header h1 { font-size: 2.5em; margin-bottom: 10px; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        header p { font-size: 1em; opacity: 0.9; }
+        .summary { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); color: white; padding: 35px; border-radius: 20px; margin-bottom: 30px; border: 1px solid rgba(255,255,255,0.2); }
+        .summary h2 { margin: 0 0 25px 0; font-size: 1.5em; }
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 25px; }
+        .summary-item { text-align: center; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 15px; border: 2px solid rgba(255,255,255,0.2); }
+        .summary-label { font-size: 0.9em; opacity: 0.9; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; }
+        .summary-value { font-size: 2.5em; font-weight: 700; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 25px; margin-bottom: 30px; }
+        .card { background: white; border-radius: 20px; padding: 35px; box-shadow: 0 15px 45px rgba(0,0,0,0.15); }
+        .card:hover { transform: translateY(-8px); transition: transform 0.3s ease; }
+        .card h2 { font-size: 1.8em; margin-bottom: 25px; color: var(--primary); }
+        .info-row { display: flex; justify-content: space-between; padding: 15px; background: #f9fafb; border-radius: 12px; margin: 12px 0; }
+        .info-row .label { font-weight: 600; color: #666; }
+        .info-row .value { font-weight: bold; color: var(--primary); }
+        .hours { display: grid; grid-template-columns: repeat(auto-fit, minmax(45px, 1fr)); gap: 8px; margin-top: 20px; }
+        .hour { padding: 10px; border-radius: 8px; text-align: center; font-weight: 600; font-size: 0.8em; }
+        .hour.cheap { background: rgba(16, 185, 129, 0.2); color: var(--success); border: 2px solid var(--success); }
+        .hour.medium { background: rgba(245, 158, 11, 0.2); color: var(--warning); border: 2px solid var(--warning); }
+        .hour.expensive { background: rgba(239, 68, 68, 0.2); color: var(--danger); border: 2px solid var(--danger); }
+        .fuel-list { list-style: none; margin-top: 20px; }
+        .fuel-item { padding: 18px; background: #f9fafb; border-radius: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; border-left: 5px solid var(--primary); }
+        .fuel-item.best { border-left-color: var(--success); background: rgba(16, 185, 129, 0.1); }
+        .fuel-name { font-weight: 600; flex: 1; }
+        .fuel-price { font-size: 1.3em; font-weight: bold; color: var(--primary); }
+        .footer { text-align: center; color: white; margin-top: 30px; opacity: 0.8; }
+        .alerts { position: fixed; top: 20px; right: 20px; z-index: 1000; }
+        .alert { background: white; padding: 15px 20px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); border-left: 5px solid var(--primary); animation: slideIn 0.3s ease-out; }
+        @keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>⚡🔥⛽ Dashboard Energía + Combustible</h1>
-            <p>Precios en tiempo real - Iberdrola, Gas y Gasolineras</p>
+            <h1>???? Dashboard Energ�a</h1>
+            <p>Precios en tiempo real - Electricidad, Gas y Gasolina</p>
         </header>
-
-        <!-- RESUMEN MENSUAL ESTIMADO -->
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 35px; border-radius: 20px; margin-bottom: 30px; box-shadow: 0 15px 45px rgba(0,0,0,0.15);">
-            <h2 style="margin-top: 0; margin-bottom: 25px; font-size: 1.5em; display: flex; align-items: center; gap: 15px;">
-                📊 Resumen Mensual Estimado
-            </h2>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 25px;">
-                <div style="text-align: center; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 15px; border: 2px solid rgba(255,255,255,0.2);">
-                    <div style="font-size: 0.9em; opacity: 0.9; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">⚡ Electricidad</div>
-                    <div style="font-size: 2.5em; font-weight: 700; line-height: 1;" id="mes-electricidad">--</div>
+        <div class="summary">
+            <h2>?? Resumen Mensual Estimado</h2>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="summary-label">? Electricidad</div>
+                    <div class="summary-value" id="mes-electricidad">--</div>
                 </div>
-                <div style="text-align: center; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 15px; border: 2px solid rgba(255,255,255,0.2);">
-                    <div style="font-size: 0.9em; opacity: 0.9; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">🔥 Gas</div>
-                    <div style="font-size: 2.5em; font-weight: 700; line-height: 1;" id="mes-gas">--</div>
+                <div class="summary-item">
+                    <div class="summary-label">?? Gas</div>
+                    <div class="summary-value" id="mes-gas">--</div>
                 </div>
-                <div style="text-align: center; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 15px; border: 2px solid rgba(255,255,255,0.2);">
-                    <div style="font-size: 0.9em; opacity: 0.9; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">⛽ Gasolina</div>
-                    <div style="font-size: 2.5em; font-weight: 700; line-height: 1;" id="mes-gasolina">--</div>
+                <div class="summary-item">
+                    <div class="summary-label">? Gasolina</div>
+                    <div class="summary-value" id="mes-gasolina">--</div>
                 </div>
-                <div style="text-align: center; padding: 20px; background: rgba(16, 185, 129, 0.2); border-radius: 15px; border: 2px solid rgba(16, 185, 129, 0.5);">
-                    <div style="font-size: 0.9em; opacity: 0.9; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">💰 Total</div>
-                    <div style="font-size: 2.5em; font-weight: 700; line-height: 1;" id="mes-total">--</div>
+                <div class="summary-item" style="background: rgba(16, 185, 129, 0.2); border-color: rgba(16, 185, 129, 0.5);">
+                    <div class="summary-label">?? Total</div>
+                    <div class="summary-value" id="mes-total">--</div>
                 </div>
             </div>
         </div>
-
         <div class="grid">
-            <!-- ELECTRICIDAD -->
             <div class="card">
-                <h2>⚡ Electricidad (Iberdrola)</h2>
-                
+                <h2>? Electricidad</h2>
                 <div class="info-row">
-                    <span class="label">Hora más barata:</span>
+                    <span class="label">Hora m�s barata:</span>
                     <span class="value" id="elec-mejor-hora">--:--</span>
                 </div>
-                
                 <div class="info-row">
                     <span class="label">Precio promedio:</span>
-                    <span class="value" id="elec-promedio">--€</span>
+                    <span class="value" id="elec-promedio">--�</span>
                 </div>
-
-                <h3 style="margin-top: 25px; font-size: 1.1em; color: var(--primary); margin-bottom: 15px; border-bottom: 2px solid var(--primary); padding-bottom: 10px;">
-                    Precios por hora (hoy)
-                </h3>
-                <div class="hours-grid" id="hours-grid"></div>
+                <h3 style="margin-top: 20px; color: var(--primary); font-size: 1em; border-bottom: 2px solid var(--primary); padding-bottom: 10px;">Precios por hora</h3>
+                <div class="hours" id="hours-grid"></div>
             </div>
-
-            <!-- GAS -->
             <div class="card">
-                <h2>🔥 Gas Natural</h2>
-                
-                <div class="price-big" id="gas-precio">--€</div>
-                
+                <h2>?? Gas Natural</h2>
+                <div style="font-size: 2.2em; font-weight: bold; color: var(--primary); text-align: center; margin: 25px 0;" id="gas-precio">--�</div>
                 <div class="info-row">
                     <span class="label">Precio por kWh:</span>
-                    <span class="value" id="gas-precio-kwh">--€</span>
+                    <span class="value" id="gas-precio-kwh">--�</span>
                 </div>
-
-                <div class="info-row">
-                    <span class="label">Tarifa:</span>
-                    <span class="value" id="gas-tarifa">T1 Residencial</span>
-                </div>
-
                 <div class="info-row">
                     <span class="label">Coste mensual:</span>
-                    <span class="value" id="gas-coste-mes">--€</span>
+                    <span class="value" id="gas-coste-mes">--�</span>
                 </div>
-
                 <div class="info-row">
                     <span class="label">Tendencia:</span>
                     <span class="value" id="gas-tendencia">--</span>
                 </div>
             </div>
-
-            <!-- GASOLINA -->
             <div class="card">
-                <h2>⛽ Gasolineras (Más Barata)</h2>
-                
+                <h2>? Gasolineras</h2>
                 <ul class="fuel-list" id="fuel-list">
-                    <li class="fuel-item">Cargando gasolineras...</li>
+                    <li class="fuel-item">Cargando...</li>
                 </ul>
             </div>
         </div>
-
-        <div class="timestamp">
-            <p>Última actualización: <span id="timestamp">--</span></p>
-        </div>
-    </div>
-
-    <div class="alerts" id="alerts-container"></div>
-
-    <script src="js/script.js"></script>
-</body>
-</html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>💡⚡🔥⛽ Dashboard Energía + Combustible - España</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --primary: #667eea;
-            --secondary: #764ba2;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --dark: #1f2937;
-            --light: #f9fafb;
-            --border: #e5e7eb;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            min-height: 100vh;
-            padding: 20px;
-            color: var(--dark);
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        /* ===== HEADER ===== */
-        header {
-            text-align: center;
-            color: white;
-            margin-bottom: 40px;
-            animation: slideDown 0.6s ease-out;
-        }
-
-        header h1 {
-            font-size: 2.8em;
-            margin-bottom: 10px;
-            text-shadow: 0 2px 15px rgba(0,0,0,0.3);
-            letter-spacing: -0.5px;
-        }
-
-        header p {
-            font-size: 1.1em;
-            opacity: 0.9;
-            font-weight: 300;
-        }
-
-        /* ===== STATUS BAR ===== */
-        .status-bar {
-            background: rgba(255,255,255,0.15);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 15px 25px;
-            color: white;
-            text-align: center;
-            margin-bottom: 30px;
-            border: 1px solid rgba(255,255,255,0.2);
-            font-weight: 600;
-            animation: fadeIn 0.8s ease-out;
-        }
-
-        /* ===== GRID ===== */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-            margin-bottom: 30px;
-        }
-
-        .grid-2col {
-            grid-template-columns: repeat(2, 1fr);
-        }
-
-        .grid-full {
-            grid-column: 1 / -1;
-        }
-
-        /* ===== CARD ===== */
-        .card {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 15px 45px rgba(0,0,0,0.15);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            animation: slideUp 0.6s ease-out;
-            border: 1px solid rgba(255,255,255,0.3);
-        }
-
-        .card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-        }
-
-        .card h2 {
-            color: var(--primary);
-            margin-bottom: 25px;
-            font-size: 1.5em;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 700;
-        }
-
-        .card h2::before {
-            font-size: 1.3em;
-            content: attr(data-icon);
-        }
-
-        /* ===== SUBTITULOS ===== */
-        .card h3 {
-            color: var(--primary);
-            margin-top: 20px;
-            margin-bottom: 15px;
-            font-size: 1.1em;
-            font-weight: 600;
-            border-bottom: 2px solid var(--primary);
-            padding-bottom: 10px;
-        }
-
-        /* ===== PRECIOS GRANDES ===== */
-        .price-display {
-            font-size: 2.8em;
-            font-weight: 700;
-            color: var(--primary);
-            margin: 20px 0;
-            line-height: 1;
-        }
-
-        .price-display.large {
-            font-size: 3.2em;
-        }
-
-        .price-display.danger {
-            color: var(--danger);
-        }
-
-        .price-display.success {
-            color: var(--success);
-        }
-
-        /* ===== ESTADÍSTICAS ===== */
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .stats.triple {
-            grid-template-columns: repeat(3, 1fr);
-        }
-
-        .stat-item {
-            background: linear-gradient(135deg, var(--light) 0%, #ffffff 100%);
-            padding: 18px;
-            border-radius: 15px;
-            border-left: 5px solid var(--primary);
-            transition: transform 0.2s ease;
-        }
-
-        .stat-item:hover {
-            transform: translateY(-3px);
-        }
-
-        .stat-item.success {
-            border-left-color: var(--success);
-        }
-
-        .stat-item.warning {
-            border-left-color: var(--warning);
-        }
-
-        .stat-item.danger {
-            border-left-color: var(--danger);
-        }
-
-        .stat-label {
-            font-size: 0.85em;
-            color: #666;
-            margin-bottom: 8px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .stat-value {
-            font-size: 1.8em;
-            font-weight: 700;
-            color: var(--dark);
-        }
-
-        /* ===== BADGE ===== */
-        .badge {
-            display: inline-block;
-            padding: 10px 18px;
-            border-radius: 25px;
-            font-size: 0.95em;
-            font-weight: 600;
-            margin-top: 10px;
-        }
-
-        .badge.ok {
-            background: var(--success);
-            color: white;
-        }
-
-        .badge.warn {
-            background: var(--warning);
-            color: white;
-        }
-
-        .badge.bad {
-            background: var(--danger);
-            color: white;
-        }
-
-        /* ===== TABLAS HORARIAS ===== */
-        .hourly-table {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
-            gap: 8px;
-            margin-top: 20px;
-        }
-
-        .hour-cell {
-            padding: 12px 8px;
-            border-radius: 10px;
-            text-align: center;
-            font-size: 0.85em;
-            font-weight: 600;
-            transition: transform 0.2s ease;
-            cursor: pointer;
-        }
-
-        .hour-cell:hover {
-            transform: scale(1.05);
-        }
-
-        .hour-cell.cheap {
-            background: rgba(16, 185, 129, 0.2);
-            color: var(--success);
-            border: 2px solid var(--success);
-        }
-
-        .hour-cell.medium {
-            background: rgba(245, 158, 11, 0.2);
-            color: var(--warning);
-            border: 2px solid var(--warning);
-        }
-
-        .hour-cell.expensive {
-            background: rgba(239, 68, 68, 0.2);
-            color: var(--danger);
-            border: 2px solid var(--danger);
-        }
-
-        /* ===== LISTA TOP 3 ===== */
-        .top-list {
-            list-style: none;
-            margin-top: 20px;
-        }
-
-        .top-item {
-            display: flex;
-            align-items: center;
-            padding: 16px;
-            background: linear-gradient(135deg, var(--light) 0%, #ffffff 100%);
-            border-radius: 12px;
-            margin-bottom: 12px;
-            border-left: 5px solid var(--primary);
-            transition: transform 0.2s ease;
-        }
-
-        .top-item:hover {
-            transform: translateX(5px);
-        }
-
-        .top-item:nth-child(1) {
-            border-left-color: #fbbf24;
-        }
-
-        .top-item:nth-child(2) {
-            border-left-color: #a78bfa;
-        }
-
-        .top-item:nth-child(3) {
-            border-left-color: #f87171;
-        }
-
-        .top-position {
-            width: 45px;
-            height: 45px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            margin-right: 15px;
-            font-size: 1.3em;
-        }
-
-        .top-item:nth-child(1) .top-position {
-            background: linear-gradient(135deg, #fbbf24, #f59e0b);
-        }
-
-        .top-item:nth-child(2) .top-position {
-            background: linear-gradient(135deg, #a78bfa, #8b5cf6);
-        }
-
-        .top-item:nth-child(3) .top-position {
-            background: linear-gradient(135deg, #f87171, #ef4444);
-        }
-
-        .top-content {
-            flex: 1;
-        }
-
-        .top-name {
-            font-weight: 700;
-            color: var(--dark);
-            margin-bottom: 4px;
-            font-size: 1.05em;
-        }
-
-        .top-price {
-            font-size: 1.4em;
-            color: var(--success);
-            font-weight: bold;
-        }
-
-        /* ===== PRESUPUESTO GASOLINA ===== */
-        .budget-container {
-            margin-top: 25px;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 20px;
-            background: var(--border);
-            border-radius: 10px;
-            overflow: hidden;
-            margin-top: 12px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--success), var(--warning));
-            border-radius: 10px;
-            transition: width 0.3s ease;
-        }
-
-        /* ===== RECOMENDACIONES ===== */
-        .recommendations {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .recommendation-card {
-            background: linear-gradient(135deg, var(--light) 0%, #ffffff 100%);
-            padding: 20px;
-            border-radius: 15px;
-            border-left: 5px solid var(--primary);
-            cursor: pointer;
-            transition: transform 0.2s ease;
-        }
-
-        .recommendation-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .rec-icon {
-            font-size: 2em;
-            margin-bottom: 10px;
-        }
-
-        .rec-title {
-            font-weight: 700;
-            color: var(--dark);
-            margin-bottom: 8px;
-            font-size: 1.05em;
-        }
-
-        .rec-detail {
-            font-size: 0.9em;
-            color: #666;
-            line-height: 1.4;
-            margin-bottom: 12px;
-        }
-
-        .rec-saving {
-            font-size: 1.2em;
-            font-weight: 700;
-            color: var(--success);
-        }
-
-        /* ===== PANEL FINANCIERO ===== */
-        .financial-panel {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            color: white;
-            padding: 30px;
-            border-radius: 20px;
-            margin-top: 30px;
-        }
-
-        .financial-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 25px;
-            margin-top: 20px;
-        }
-
-        .financial-item {
-            text-align: center;
-            padding: 20px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 15px;
-            border: 2px solid rgba(255,255,255,0.2);
-        }
-
-        .financial-label {
-            font-size: 0.9em;
-            opacity: 0.9;
-            margin-bottom: 10px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .financial-amount {
-            font-size: 2.5em;
-            font-weight: 700;
-            line-height: 1;
-        }
-
-        /* ===== GRÁFICO ===== */
-        .chart-container {
-            position: relative;
-            height: 400px;
-            margin-top: 25px;
-        }
-
-        /* ===== ANIMACIONES ===== */
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 768px) {
-            header h1 {
-                font-size: 2em;
-            }
-
-            .grid {
-                grid-template-columns: 1fr;
-            }
-
-            .grid-2col {
-                grid-template-columns: 1fr;
-            }
-
-            .stats {
-                grid-template-columns: 1fr;
-            }
-
-            .stats.triple {
-                grid-template-columns: 1fr;
-            }
-
-            .price-display {
-                font-size: 2.2em;
-            }
-
-            .price-display.large {
-                font-size: 2.5em;
-            }
-
-            .card {
-                padding: 20px;
-            }
-
-            .hourly-table {
-                grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
-            }
-
-            .financial-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .recommendations {
-                grid-template-columns: 1fr;
-            }
-
-            .chart-container {
-                height: 300px;
-            }
-        }
-
-        /* ===== FOOTER ===== */
-        .footer {
-            text-align: center;
-            color: white;
-            font-size: 0.9em;
-            opacity: 0.8;
-            padding: 20px;
-            margin-top: 40px;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #667eea;
-            font-weight: 600;
-        }
-
-        .error-text {
-            color: var(--danger);
-            font-weight: 600;
-            padding: 20px;
-            background: rgba(239, 68, 68, 0.1);
-            border-radius: 10px;
-            border-left: 5px solid var(--danger);
-        }
-    </style>
-</head>
-
-<body>
-    <div class="container">
-        <!-- HEADER -->
-        <header>
-            <h1>💡⚡🔥⛽ Dashboard Integral</h1>
-            <p>Control total de energía y combustible en España</p>
-        </header>
-
-        <!-- STATUS BAR -->
-        <div class="status-bar" id="status-bar">
-            <span id="status-icon">🔄</span>
-            <span id="status-text"> Cargando datos...</span>
-        </div>
-
-        <!-- PANEL FINANCIERO UNIFICADO -->
-        <div class="financial-panel">
-            <h2 style="margin: 0 0 10px 0; font-size: 1.4em;">📊 Resumen Mensual Estimado</h2>
-            <div class="financial-grid">
-                <div class="financial-item">
-                    <div class="financial-label">⚡ Electricidad</div>
-                    <div class="financial-amount" id="fin-electricity">--</div>
-                </div>
-                <div class="financial-item">
-                    <div class="financial-label">🔥 Gas</div>
-                    <div class="financial-amount" id="fin-gas">--</div>
-                </div>
-                <div class="financial-item">
-                    <div class="financial-label">⛽ Gasolina</div>
-                    <div class="financial-amount" id="fin-fuel">--</div>
-                </div>
-                <div class="financial-item">
-                    <div class="financial-label">💰 Total</div>
-                    <div class="financial-amount" id="fin-total">--</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- GRID PRINCIPAL -->
-        <div class="grid">
-
-            <!-- TARJETA: ELECTRICIDAD -->
-            <div class="card grid-2col">
-                <div>
-                    <h2 data-icon="⚡">Electricidad (OMIE)</h2>
-                    
-                    <h3>Precios Hoy</h3>
-                    <div class="stats">
-                        <div class="stat-item success">
-                            <div class="stat-label">💚 Más barata</div>
-                            <div class="stat-value" id="elec-cheap">--</div>
-                        </div>
-                        <div class="stat-item warning">
-                            <div class="stat-label">🌅 Promedio</div>
-                            <div class="stat-value" id="elec-avg">--</div>
-                        </div>
-                        <div class="stat-item danger">
-                            <div class="stat-label">🔴 Más cara</div>
-                            <div class="stat-value" id="elec-expensive">--</div>
-                        </div>
-                    </div>
-
-                    <h3>🌟 Mejor Ventana de Consumo</h3>
-                    <div class="stats">
-                        <div class="stat-item">
-                            <div class="stat-label">🕐 Horario</div>
-                            <div class="stat-value" id="elec-best-hours">--</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">Precio medio</div>
-                            <div class="stat-value" id="elec-best-price">--</div>
-                        </div>
-                    </div>
-
-                    <h3>💡 Consumo Estimado (25 kWh/día)</h3>
-                    <div class="stats">
-                        <div class="stat-item">
-                            <div class="stat-label">Diario</div>
-                            <div class="stat-value" id="elec-daily-cost">--</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">Mensual</div>
-                            <div class="stat-value" id="elec-monthly-cost">--</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div>
-                    <h3>📈 Tarifa Horaria (24h)</h3>
-                    <div class="hourly-table" id="hourly-prices"></div>
-                    <div class="chart-container">
-                        <canvas id="hourly-chart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TARJETA: GAS -->
-            <div class="card">
-                <h2 data-icon="🔥">Gas (TUR Naturgy)</h2>
-                
-                <h3>Tarifa Actual</h3>
-                <div class="stats triple">
-                    <div class="stat-item">
-                        <div class="stat-label">Precio/kWh</div>
-                        <div class="stat-value" id="gas-price">--</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">Término fijo</div>
-                        <div class="stat-value" id="gas-fixed">--</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">Tipo</div>
-                        <div class="stat-value" id="gas-type">--</div>
-                    </div>
-                </div>
-
-                <h3>Costes Estimados</h3>
-                <div class="stats">
-                    <div class="stat-item">
-                        <div class="stat-label">Diario</div>
-                        <div class="stat-value" id="gas-daily">--</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">Mensual</div>
-                        <div class="stat-value" id="gas-monthly">--</div>
-                    </div>
-                </div>
-
-                <h3>Consumo Estimado</h3>
-                <div class="stats">
-                    <div class="stat-item">
-                        <div class="stat-label">Diario</div>
-                        <div class="stat-value" id="gas-daily-consumption">--</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">Mensual</div>
-                        <div class="stat-value" id="gas-monthly-consumption">--</div>
-                    </div>
-                </div>
-
-                <div id="gas-alert" class="badge warn"></div>
-            </div>
-
-            <!-- TARJETA: GASOLINA -->
-            <div class="card">
-                <h2 data-icon="⛽">Gasolina 95 (Repsol)</h2>
-                
-                <h3>Mejor Precio Hoy</h3>
-                <div class="price-display success" id="fuel-best-price">--</div>
-                <div style="color: #666; font-size: 1.1em; margin-bottom: 15px;">
-                    <strong id="fuel-best-station">--</strong>
-                </div>
-                <div id="fuel-alert" class="badge"></div>
-
-                <h3>Estadísticas</h3>
-                <div class="stats">
-                    <div class="stat-item">
-                        <div class="stat-label">Promedio</div>
-                        <div class="stat-value" id="fuel-avg">--</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">Más caro</div>
-                        <div class="stat-value danger" id="fuel-worst">--</div>
-                    </div>
-                </div>
-
-                <h3>Estaciones más baratas</h3>
-                <ul class="top-list" id="fuel-top3"></ul>
-            </div>
-
-            <!-- TARJETA: PRESUPUESTO GASOLINA -->
-            <div class="card">
-                <h2 data-icon="💳">Control de Presupuesto</h2>
-                
-                <h3>Presupuesto Mensual: 100€</h3>
-                <div class="budget-container">
-                    <div class="stats">
-                        <div class="stat-item">
-                            <div class="stat-label">Gastado</div>
-                            <div class="stat-value" id="budget-spent">--</div>
-                        </div>
-                        <div class="stat-item success">
-                            <div class="stat-label">Saldo</div>
-                            <div class="stat-value" id="budget-remaining">--</div>
-                        </div>
-                    </div>
-
-                    <div style="margin-top: 20px;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                            <span style="font-weight: 600;">Progreso del mes</span>
-                            <span id="budget-percentage" style="font-weight: 700; color: var(--primary);">--</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="budget-bar" style="width: 0%"></div>
-                        </div>
-                    </div>
-
-                    <div class="stats" style="margin-top: 20px;">
-                        <div class="stat-item">
-                            <div class="stat-label">Días restantes</div>
-                            <div class="stat-value" id="budget-days">--</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">Gasto diario medio</div>
-                            <div class="stat-value" id="budget-daily">--</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="budget-alert" class="badge" style="margin-top: 20px;"></div>
-            </div>
-
-        </div>
-
-        <!-- RECOMENDACIONES INTELIGENTES -->
-        <div class="card grid-full">
-            <h2 data-icon="💡">Recomendaciones de Ahorro</h2>
-            <div class="recommendations" id="recommendations">
-                <div class="loading">Cargando recomendaciones...</div>
-            </div>
-        </div>
-
-        <!-- INFORMACIÓN SISTEMA -->
-        <div class="card grid-full">
-            <h2 data-icon="ℹ️">Información del Sistema</h2>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px;">
-                <div class="stat-item">
-                    <div class="stat-label">🕒 Última actualización</div>
-                    <div class="stat-value" id="timestamp" style="font-size: 1.2em;">--</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-label">🔗 Estado API</div>
-                    <div class="stat-value" id="api-status">--</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-label">📊 Datos disponibles</div>
-                    <div class="stat-value" id="data-status">--</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-label">⛽ Gasolineras</div>
-                    <div class="stat-value" id="total-stations">--</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- FOOTER -->
         <div class="footer">
-            <p>💚 Dashboard Integral 2026 | España | Actualización en tiempo real | <a href="#" style="color: white; text-decoration: underline;">GitHub</a></p>
+            <p>�ltima actualizaci�n: <span id="timestamp">--</span></p>
         </div>
-
     </div>
-
-    <!-- SCRIPTS -->
-    <script src="js/script.js"></script>
-
+    <div class="alerts" id="alerts-container"></div>
+    <script src="js/script.js"><\/script>
 </body>
 </html>
