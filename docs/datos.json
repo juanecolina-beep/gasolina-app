@@ -1,172 +1,172 @@
 {
-  "timestamp": "2026-04-18T08:46:41.764875",
+  "timestamp": "2026-04-18T09:04:13.190294",
   "electricidad": {
     "horas": [
       {
         "hora": "00:00",
-        "precio": 0.0655,
+        "precio": 0.0646,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "01:00",
-        "precio": 0.0572,
+        "precio": 0.0595,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "02:00",
-        "precio": 0.0502,
-        "estado": "🟢 Barata",
-        "categoria": "cheap"
+        "precio": 0.0527,
+        "estado": "🟡 Media",
+        "categoria": "medium"
       },
       {
         "hora": "03:00",
-        "precio": 0.048,
+        "precio": 0.0467,
         "estado": "🟢 Barata",
         "categoria": "cheap"
       },
       {
         "hora": "04:00",
-        "precio": 0.054,
+        "precio": 0.0527,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "05:00",
-        "precio": 0.0733,
+        "precio": 0.0705,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "06:00",
-        "precio": 0.0943,
+        "precio": 0.0987,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "07:00",
-        "precio": 0.1333,
+        "precio": 0.1322,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "08:00",
-        "precio": 0.1698,
+        "precio": 0.1689,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "09:00",
-        "precio": 0.1602,
+        "precio": 0.1521,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "10:00",
-        "precio": 0.1456,
+        "precio": 0.1373,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "11:00",
-        "precio": 0.1308,
+        "precio": 0.1237,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "12:00",
-        "precio": 0.1164,
+        "precio": 0.1098,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "13:00",
-        "precio": 0.1244,
+        "precio": 0.1311,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "14:00",
-        "precio": 0.1362,
+        "precio": 0.1335,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "15:00",
-        "precio": 0.1492,
+        "precio": 0.1496,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "16:00",
-        "precio": 0.1993,
+        "precio": 0.1902,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "17:00",
-        "precio": 0.2212,
+        "precio": 0.2066,
         "estado": "🔴 Cara",
         "categoria": "expensive"
       },
       {
         "hora": "18:00",
-        "precio": 0.2404,
+        "precio": 0.225,
         "estado": "🔴 Cara",
         "categoria": "expensive"
       },
       {
         "hora": "19:00",
-        "precio": 0.2402,
+        "precio": 0.2331,
         "estado": "🔴 Cara",
         "categoria": "expensive"
       },
       {
         "hora": "20:00",
-        "precio": 0.2309,
+        "precio": 0.2328,
         "estado": "🔴 Cara",
         "categoria": "expensive"
       },
       {
         "hora": "21:00",
-        "precio": 0.1942,
+        "precio": 0.1822,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "22:00",
-        "precio": 0.152,
+        "precio": 0.1439,
         "estado": "🟡 Media",
         "categoria": "medium"
       },
       {
         "hora": "23:00",
-        "precio": 0.0883,
+        "precio": 0.0886,
         "estado": "🟡 Media",
         "categoria": "medium"
       }
     ],
-    "precio_minimo": 0.048,
-    "precio_maximo": 0.2404,
-    "precio_promedio": 0.1365,
+    "precio_minimo": 0.0467,
+    "precio_maximo": 0.2331,
+    "precio_promedio": 0.1328,
     "mejor_ventana": {
       "inicio": "01:00",
       "fin": "05:00",
-      "promedio": 0.0524
+      "promedio": 0.0529
     },
-    "coste_diario_estimado": 3.41,
-    "coste_mensual_estimado": 102.38
+    "coste_diario_estimado": 3.32,
+    "coste_mensual_estimado": 99.6
   },
   "gas": {
-    "precio_kwh": 0.0515,
+    "precio_kwh": 0.048,
     "termino_fijo_diario": 0.35,
     "consumo_estimado_diario": 8,
     "consumo_estimado_mensual": 240,
-    "coste_variable_diario": 0.41,
+    "coste_variable_diario": 0.38,
     "coste_fijo_diario": 0.35,
-    "coste_diario_total": 0.76,
-    "coste_mensual_total": 22.8,
+    "coste_diario_total": 0.73,
+    "coste_mensual_total": 21.9,
     "alerta": "✅ Tarifa estable",
     "tendencia": "estable",
     "tarifa_type": "T1 - Residencial",
@@ -260,7 +260,7 @@
       "tipo": "Electricidad",
       "titulo": "⚡ Ahorro en horas valle",
       "descripcion": "Usa lavadora entre 01:00-05:00",
-      "ahorro_estimado": 15.36,
+      "ahorro_estimado": 14.94,
       "urgencia": "media"
     },
     {
