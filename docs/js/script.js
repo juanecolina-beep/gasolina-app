@@ -117,7 +117,7 @@ function procesarGasolina(data) {
         return;
     }
     
-    lista.innerHTML = filtered.slice(0, 3).map((g, idx) => `
+    lista.innerHTML = filtered.map((g, idx) => `
         <li class="fi ${idx === 0 ? 'best' : ''}">
             <div>
                 <div class="fn">${g.nombre}</div>
