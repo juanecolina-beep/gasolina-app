@@ -153,7 +153,7 @@ function crearMapa(gasolineras) {
 // ===== CARGAR Y PROCESAR DATOS =====
 async function cargarDatos() {
     try {
-        const response = await fetch('datos.json');
+        const response = await fetch('./datos.json');
         const data = await response.json();
         
         // Procesar todos los datos
@@ -569,7 +569,7 @@ async function cargarDatos() {
         statusIcon.textContent = '🔄';
         statusText.textContent = ' Cargando datos...';
 
-        const response = await fetch('datos.json');
+        const response = await fetch('./datos.json');
 
         if (!response.ok) {
             throw new Error(`Error HTTP: ${ response.status }`);
